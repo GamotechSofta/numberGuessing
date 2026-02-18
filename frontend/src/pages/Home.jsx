@@ -49,7 +49,7 @@ export default function Home() {
             Welcome to Dpboss Online
           </h1>
           <p className="text-gray-300 text-sm sm:text-base mb-4 max-w-2xl mx-auto">
-            India's Most Trusted Satta Matka Platform - Get Fast Results, Expert Tips, and Accurate Predictions
+            India's Most Trusted Satta Matka number Guessing Platform - Get Fast Results, Expert Tips, and Accurate Predictions
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-6">
             <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
