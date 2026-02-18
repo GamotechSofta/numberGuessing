@@ -48,7 +48,7 @@ export default function Navbar() {
         </div>
         
         {/* Bottom Navigation Menu */}
-        <div className="flex items-center justify-between px-4">
+        <div className="flex items-center px-4">
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -78,8 +78,8 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center justify-center gap-3 md:gap-6 text-xs sm:text-sm font-medium py-2.5">
+          {/* Desktop Navigation - Centered */}
+          <div className="hidden sm:flex items-center justify-center flex-1 gap-3 md:gap-6 text-xs sm:text-sm font-medium py-2.5">
             <Link 
               to="/" 
               className={`px-3 py-1.5 rounded transition-colors ${
