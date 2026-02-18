@@ -1,54 +1,54 @@
 export default function About() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-white w-full">
-      <div className="w-full py-8 px-4 sm:px-6 lg:px-8 border-t-2 border-yellow-600">
+    <div className="min-h-screen bg-gray-900 text-white w-full">
+      <div className="w-full py-6 px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-8 text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-yellow-400 mb-6 text-center">
             About Dpboss Online
           </h1>
           
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 sm:p-8 border-2 border-yellow-600/50 shadow-xl mb-6">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Who We Are</h2>
-            <p className="text-gray-300 leading-relaxed mb-4 text-lg">
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-yellow-400 mb-3">Who We Are</h2>
+            <p className="text-gray-300 leading-relaxed mb-3 text-sm sm:text-base">
               Dpbossonline.com is India's leading Satta Matka results website. We provide 
               fast and accurate results, expert tips, and comprehensive Matka information 
               to make your experience joyous and rewarding.
             </p>
-            <p className="text-gray-300 leading-relaxed text-lg">
+            <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
               Our platform offers live results, historical charts, expert tips, and all the 
               tools you need for a complete Matka experience.
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 sm:p-8 border-2 border-yellow-600/50 shadow-xl mb-6">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-6">Our Services</h2>
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-yellow-400 mb-4">Our Services</h2>
             <ul className="space-y-3 text-gray-300">
-              <li className="flex items-center gap-3 text-lg">
-                <span className="text-yellow-400 text-xl">✓</span>
+              <li className="flex items-center gap-3 text-sm sm:text-base">
+                <span className="text-yellow-400 text-base">✓</span>
                 <span>Live Matka Results</span>
               </li>
-              <li className="flex items-center gap-3 text-lg">
-                <span className="text-yellow-400 text-xl">✓</span>
+              <li className="flex items-center gap-3 text-sm sm:text-base">
+                <span className="text-yellow-400 text-base">✓</span>
                 <span>Expert Tips and Guessing</span>
               </li>
-              <li className="flex items-center gap-3 text-lg">
-                <span className="text-yellow-400 text-xl">✓</span>
+              <li className="flex items-center gap-3 text-sm sm:text-base">
+                <span className="text-yellow-400 text-base">✓</span>
                 <span>Historical Charts</span>
               </li>
-              <li className="flex items-center gap-3 text-lg">
-                <span className="text-yellow-400 text-xl">✓</span>
+              <li className="flex items-center gap-3 text-sm sm:text-base">
+                <span className="text-yellow-400 text-base">✓</span>
                 <span>Fast Result Updates</span>
               </li>
-              <li className="flex items-center gap-3 text-lg">
-                <span className="text-yellow-400 text-xl">✓</span>
+              <li className="flex items-center gap-3 text-sm sm:text-base">
+                <span className="text-yellow-400 text-base">✓</span>
                 <span>Comprehensive Matka Information</span>
               </li>
             </ul>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 sm:p-8 border-2 border-yellow-600/50 shadow-xl">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Contact</h2>
-            <p className="text-gray-300 text-lg leading-relaxed">
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+            <h2 className="text-lg sm:text-xl font-semibold text-yellow-400 mb-3">Contact</h2>
+            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
               For any queries or support, please visit our website or contact our support team.
             </p>
           </div>

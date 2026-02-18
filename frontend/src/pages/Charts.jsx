@@ -45,37 +45,37 @@ export default function Charts() {
   }
 
   const renderDayCell = (dayData) => {
-    if (!dayData) return <td className="border-2 border-yellow-600/50 px-4 py-3 text-center align-middle bg-gray-800/50">-</td>
+    if (!dayData) return <td className="border border-gray-700 px-2 sm:px-3 py-2 text-center align-middle bg-white text-xs">-</td>
     
     // Check if it's the new object format or old string format
     if (typeof dayData === 'object' && dayData !== null && 'mainNumber' in dayData) {
       const { mainNumber, isHighlighted, leftNumbers = [], rightNumbers = [], hasAsterisk, asteriskCount = 0 } = dayData
       
       return (
-        <td className="border-2 border-yellow-600/50 px-4 py-3 text-center align-middle bg-gray-800/50">
-          <div className="flex items-center justify-center gap-1 relative">
+        <td className="border border-gray-700 px-2 sm:px-3 py-2 text-center align-middle bg-white">
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
             {/* Left numbers */}
-            <div className="flex flex-col items-end gap-0.5 text-xs text-gray-400">
+            <div className="flex flex-col items-end gap-0.5 text-[9px] sm:text-[10px] text-gray-600">
               {leftNumbers.map((num, idx) => (
                 <span key={`left-${idx}`}>{num}</span>
               ))}
               {hasAsterisk && Array(asteriskCount).fill(0).map((_, idx) => (
-                <span key={`left-ast-${idx}`} className="text-yellow-400">*</span>
+                <span key={`left-ast-${idx}`} className="text-gray-400">*</span>
               ))}
             </div>
             
             {/* Main number */}
-            <div className={`text-2xl font-bold mx-2 ${isHighlighted ? 'text-red-400' : 'text-green-400'}`}>
+            <div className={`text-base sm:text-lg md:text-xl font-bold mx-1 ${isHighlighted ? 'text-red-500' : 'text-gray-900'}`}>
               {mainNumber || (hasAsterisk ? '**' : '-')}
             </div>
             
             {/* Right numbers */}
-            <div className="flex flex-col items-start gap-0.5 text-xs text-gray-400">
+            <div className="flex flex-col items-start gap-0.5 text-[9px] sm:text-[10px] text-gray-600">
               {rightNumbers.map((num, idx) => (
                 <span key={`right-${idx}`}>{num}</span>
               ))}
               {hasAsterisk && Array(asteriskCount).fill(0).map((_, idx) => (
-                <span key={`right-ast-${idx}`} className="text-yellow-400">*</span>
+                <span key={`right-ast-${idx}`} className="text-gray-400">*</span>
               ))}
             </div>
           </div>
@@ -87,9 +87,9 @@ export default function Charts() {
       const lines = value.split('\n').filter(line => line.trim())
       
       return (
-        <td className="border-2 border-yellow-600/50 px-4 py-3 text-center text-green-400 font-bold bg-gray-800/50">
+        <td className="border border-gray-700 px-2 sm:px-3 py-2 text-center text-gray-900 font-semibold bg-white text-xs">
           {lines.length > 0 ? (
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-0.5">
               {lines.map((line, index) => (
                 <span key={index} className="block">{line}</span>
               ))}
@@ -113,57 +113,57 @@ export default function Charts() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-white w-full">
-      <div className="w-full py-8 px-4 sm:px-6 lg:px-8 border-t-2 border-yellow-600">
+    <div className="min-h-screen bg-gray-900 text-white w-full">
+      <div className="w-full py-6 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-bold text-yellow-400 mb-8 text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-yellow-400 mb-6 text-center">
             Market Analysis Charts
           </h1>
 
           {/* HTML Data */}
           {htmlMarkets.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border-2 border-yellow-600/50 shadow-xl">
-              <p className="text-center text-gray-400 py-8">No HTML chart data available</p>
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+              <p className="text-center text-gray-400 py-8 text-sm sm:text-base">No HTML chart data available</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {htmlMarkets.map((market) => {
                 const isExpanded = expandedMarkets[market.name] || false
                 return (
-                  <div key={market.name} className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border-2 border-yellow-600/50 shadow-xl overflow-hidden">
+                  <div key={market.name} className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
                     {/* Market Header - Clickable */}
                     <button
                       onClick={() => toggleMarket(market.name)}
-                      className="w-full px-6 py-4 flex items-center justify-between bg-gray-800/70 hover:bg-gray-800/90 transition-colors"
+                      className="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-gray-800 hover:bg-gray-750 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{isExpanded ? '▼' : '▶'}</span>
-                        <span className="text-gray-400 text-lg font-semibold">Panel</span>
-                        <h2 className="text-2xl font-bold text-yellow-400">{market.name}</h2>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-base sm:text-lg">{isExpanded ? '▼' : '▶'}</span>
+                        <span className="text-gray-400 text-sm sm:text-base font-medium">Panel</span>
+                        <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-yellow-400">{market.name}</h2>
                       </div>
                     </button>
                     
                     {/* Market Table - Collapsible */}
                     {isExpanded && (
-                      <div className="p-6 border-t border-yellow-600/30 overflow-x-auto">
+                      <div className="p-3 sm:p-4 border-t border-gray-700 overflow-x-auto">
                         <div className="overflow-x-auto">
-                          <table className="w-full border-collapse">
+                          <table className="w-full border-collapse min-w-[600px]">
                             <thead>
-                              <tr className="bg-yellow-600/80">
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold text-left">Date</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Mon</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Tue</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Wed</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Thu</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Fri</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Sat</th>
-                                <th className="border-2 border-yellow-600/50 px-4 py-3 text-black font-bold">Sun</th>
+                              <tr className="bg-yellow-500">
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-left text-xs">Date</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Mon</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Tue</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Wed</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Thu</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Fri</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Sat</th>
+                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Sun</th>
                               </tr>
                             </thead>
                             <tbody>
                               {market.charts.map((chart, index) => (
-                                <tr key={`${market.name}-${index}`} className="bg-gray-800/50 hover:bg-gray-800/70 transition-colors">
-                                  <td className="border-2 border-yellow-600/50 px-4 py-3 text-white font-semibold bg-gray-800/50">
+                                <tr key={`${market.name}-${index}`} className="bg-gray-800 hover:bg-gray-750 transition-colors">
+                                  <td className="border border-gray-700 px-2 sm:px-3 py-2 text-white font-medium bg-gray-800 text-xs">
                                     {chart.Date || '-'}
                                   </td>
                                   {renderDayCell(chart.Mon)}
@@ -186,9 +186,9 @@ export default function Charts() {
             </div>
           )}
 
-          <div className="mt-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 sm:p-8 border-2 border-yellow-600/50 shadow-xl">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">How to Analyze</h2>
-            <div className="text-gray-300 text-lg leading-relaxed space-y-2">
+          <div className="mt-6 bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+            <h2 className="text-lg sm:text-xl font-semibold text-yellow-400 mb-3">How to Analyze</h2>
+            <div className="text-gray-300 text-sm sm:text-base leading-relaxed space-y-2">
               <p>• Review the main numbers (large center numbers) for each day</p>
               <p>• Check the small numbers on the left and right sides</p>
               <p>• Red highlighted numbers indicate special significance</p>

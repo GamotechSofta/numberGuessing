@@ -77,57 +77,57 @@ export default function Markets() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Markets Management</h2>
-        <p className="text-gray-400">Add, edit, or delete markets</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Markets Management</h2>
+        <p className="text-gray-400 text-sm sm:text-base">Add, edit, or delete markets</p>
       </div>
 
       {/* Form */}
-      <div className="bg-gray-800 rounded-lg p-6 border-2 border-yellow-600">
-        <h3 className="text-2xl font-bold text-yellow-400 mb-4">
+      <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
+        <h3 className="text-xl sm:text-2xl font-bold text-yellow-400 mb-4">
           {editingId ? 'Edit Market' : 'Add New Market'}
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-300 mb-2">Market Name</label>
+            <label className="block text-gray-300 mb-2 text-sm sm:text-base">Market Name</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+              className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm sm:text-base"
               required
               placeholder="e.g., KALYAN"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Open</label>
+              <label className="block text-gray-300 mb-2 text-sm sm:text-base">Open</label>
               <input
                 type="text"
                 value={formData.open}
                 onChange={(e) => setFormData({ ...formData, open: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm sm:text-base"
                 required
                 placeholder="e.g., 2-5-8"
               />
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Close</label>
+              <label className="block text-gray-300 mb-2 text-sm sm:text-base">Close</label>
               <input
                 type="text"
                 value={formData.close}
                 onChange={(e) => setFormData({ ...formData, close: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm sm:text-base"
                 required
                 placeholder="e.g., 3-6-9"
               />
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               type="submit"
-              className="px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500"
+              className="px-4 sm:px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 text-sm sm:text-base"
             >
               {editingId ? 'Update Market' : 'Add Market'}
             </button>
@@ -135,7 +135,7 @@ export default function Markets() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-6 py-2 bg-gray-600 text-white font-semibold rounded hover:bg-gray-500"
+                className="px-4 sm:px-6 py-2 bg-gray-600 text-white font-semibold rounded hover:bg-gray-500 text-sm sm:text-base"
               >
                 Cancel
               </button>
@@ -145,38 +145,38 @@ export default function Markets() {
       </div>
 
       {/* Markets List */}
-      <div className="bg-gray-800 rounded-lg p-6 border-2 border-yellow-600">
-        <h3 className="text-2xl font-bold text-yellow-400 mb-4">Markets List ({markets.length})</h3>
+      <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
+        <h3 className="text-xl sm:text-2xl font-bold text-yellow-400 mb-4">Markets List ({markets.length})</h3>
         {markets.length === 0 ? (
-          <p className="text-gray-400 text-center py-8">No markets found. Add your first market above.</p>
+          <p className="text-gray-400 text-center py-8 text-sm sm:text-base">No markets found. Add your first market above.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {markets.map((market) => (
               <div
                 key={market._id}
-                className="bg-gray-700 rounded-lg p-4 border border-yellow-500/30"
+                className="bg-gray-700 rounded-lg p-3 sm:p-4 border border-yellow-500/30"
               >
-                <h4 className="text-xl font-bold text-yellow-400 mb-3">{market.name}</h4>
+                <h4 className="text-lg sm:text-xl font-bold text-yellow-400 mb-3">{market.name}</h4>
                 <div className="space-y-2 mb-4">
                   <div>
-                    <span className="text-gray-400 text-sm">Open: </span>
-                    <span className="text-green-400 font-bold">{market.open}</span>
+                    <span className="text-gray-400 text-xs sm:text-sm">Open: </span>
+                    <span className="text-green-400 font-bold text-sm sm:text-base">{market.open}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 text-sm">Close: </span>
-                    <span className="text-green-400 font-bold">{market.close}</span>
+                    <span className="text-gray-400 text-xs sm:text-sm">Close: </span>
+                    <span className="text-green-400 font-bold text-sm sm:text-base">{market.close}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(market)}
-                    className="flex-1 px-4 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 text-sm"
+                    className="flex-1 px-3 sm:px-4 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 text-xs sm:text-sm"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(market._id)}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-500 text-sm"
+                    className="flex-1 px-3 sm:px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-500 text-xs sm:text-sm"
                   >
                     Delete
                   </button>

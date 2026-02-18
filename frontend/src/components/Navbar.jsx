@@ -1,80 +1,185 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 export default function Navbar() {
   const location = useLocation()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   const isActive = (path) => location.pathname === path
 
   return (
-    <nav className="bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 text-black shadow-lg sticky top-0 z-50 w-full">
-      <div className="w-full">
-        {/* Top Navigation Bar */}
-        <div className="flex items-center justify-center gap-3 text-sm font-bold py-2 px-4 border-b border-yellow-700">
-          <span className="text-lg">👑</span>
-          <Link to="/" className="hover:text-yellow-900 transition-colors duration-200">Dpboss</Link>
-          <span className="text-yellow-800">|</span>
-          <Link to="/" className="hover:text-yellow-900 transition-colors duration-200">Satta Matka</Link>
-          <span className="text-yellow-800">|</span>
-          <Link to="/" className="hover:text-yellow-900 transition-colors duration-200">Kalyan Matka</Link>
-          <span className="text-yellow-800">|</span>
-          <Link to="/results" className="hover:text-yellow-900 transition-colors duration-200">Online Matka Result</Link>
-          <span className="text-lg">👑</span>
+    <>
+      <style>{`
+        @keyframes scroll-right-to-left {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+        .scrolling-text {
+          display: inline-block;
+          animation: scroll-right-to-left 20s linear infinite;
+          will-change: transform;
+        }
+      `}</style>
+      <nav className="bg-yellow-500 text-black shadow-md sticky top-0 z-50 w-full">
+        <div className="w-full">
+        {/* Top Navigation Bar - Desktop Only */}
+        <div className="hidden sm:flex items-center justify-center gap-2 md:gap-3 text-xs sm:text-sm font-semibold py-2 px-4 border-b border-yellow-600">
+          <Link to="/" className="hover:text-yellow-900 transition-colors whitespace-nowrap">Dpboss</Link>
+          <span className="text-yellow-800 hidden md:inline">|</span>
+          <Link to="/" className="hover:text-yellow-900 transition-colors whitespace-nowrap">Satta Matka</Link>
+          <span className="text-yellow-800 hidden lg:inline">|</span>
+          <Link to="/" className="hover:text-yellow-900 transition-colors whitespace-nowrap hidden lg:inline">Kalyan Matka</Link>
+          <span className="text-yellow-800 hidden lg:inline">|</span>
+          <Link to="/results" className="hover:text-yellow-900 transition-colors whitespace-nowrap hidden md:inline">Online Matka Result</Link>
         </div>
         
         {/* Bottom Navigation Menu */}
-        <div className="flex items-center justify-center gap-6 text-sm font-semibold py-2.5 px-4">
-          <Link 
-            to="/" 
-            className={`px-3 py-1 rounded transition-all duration-200 ${
-              isActive('/') 
-                ? 'bg-yellow-700 text-white shadow-md' 
-                : 'hover:bg-yellow-400 hover:text-yellow-900'
-            }`}
+        <div className="flex items-center justify-between px-4">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="sm:hidden p-2 text-black hover:bg-yellow-400 rounded transition-colors flex-shrink-0 z-10"
+            aria-label="Toggle menu"
           >
-            Home
-          </Link>
-          <Link 
-            to="/results" 
-            className={`px-3 py-1 rounded transition-all duration-200 ${
-              isActive('/results') 
-                ? 'bg-yellow-700 text-white shadow-md' 
-                : 'hover:bg-yellow-400 hover:text-yellow-900'
-            }`}
-          >
-            Results
-          </Link>
-          <Link 
-            to="/tips" 
-            className={`px-3 py-1 rounded transition-all duration-200 ${
-              isActive('/tips') 
-                ? 'bg-yellow-700 text-white shadow-md' 
-                : 'hover:bg-yellow-400 hover:text-yellow-900'
-            }`}
-          >
-            Tips
-          </Link>
-          <Link 
-            to="/charts" 
-            className={`px-3 py-1 rounded transition-all duration-200 ${
-              isActive('/charts') 
-                ? 'bg-yellow-700 text-white shadow-md' 
-                : 'hover:bg-yellow-400 hover:text-yellow-900'
-            }`}
-          >
-            Charts
-          </Link>
-          <Link 
-            to="/about" 
-            className={`px-3 py-1 rounded transition-all duration-200 ${
-              isActive('/about') 
-                ? 'bg-yellow-700 text-white shadow-md' 
-                : 'hover:bg-yellow-400 hover:text-yellow-900'
-            }`}
-          >
-            About
-          </Link>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+
+          {/* Scrolling Text - Mobile Only */}
+          <div className="sm:hidden flex-1 overflow-hidden ml-2 mr-2 relative">
+            <div className="scrolling-text whitespace-nowrap text-xs font-semibold text-black">
+              India's no.1 betting prediction site • India's no.1 betting prediction site • India's no.1 betting prediction site • 
+            </div>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center justify-center gap-3 md:gap-6 text-xs sm:text-sm font-medium py-2.5">
+            <Link 
+              to="/" 
+              className={`px-3 py-1.5 rounded transition-colors ${
+                isActive('/') 
+                  ? 'bg-yellow-600 text-black font-semibold' 
+                  : 'hover:bg-yellow-400'
+              }`}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/results" 
+              className={`px-3 py-1.5 rounded transition-colors ${
+                isActive('/results') 
+                  ? 'bg-yellow-600 text-black font-semibold' 
+                  : 'hover:bg-yellow-400'
+              }`}
+            >
+              Results
+            </Link>
+            <Link 
+              to="/tips" 
+              className={`px-3 py-1.5 rounded transition-colors ${
+                isActive('/tips') 
+                  ? 'bg-yellow-600 text-black font-semibold' 
+                  : 'hover:bg-yellow-400'
+              }`}
+            >
+              Tips
+            </Link>
+            <Link 
+              to="/charts" 
+              className={`px-3 py-1.5 rounded transition-colors ${
+                isActive('/charts') 
+                  ? 'bg-yellow-600 text-black font-semibold' 
+                  : 'hover:bg-yellow-400'
+              }`}
+            >
+              Charts
+            </Link>
+            <Link 
+              to="/about" 
+              className={`px-3 py-1.5 rounded transition-colors ${
+                isActive('/about') 
+                  ? 'bg-yellow-600 text-black font-semibold' 
+                  : 'hover:bg-yellow-400'
+              }`}
+            >
+              About
+            </Link>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden border-t border-yellow-600 bg-yellow-500">
+            <div className="flex flex-col">
+              <Link 
+                to="/" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium transition-colors ${
+                  isActive('/') 
+                    ? 'bg-yellow-600 text-black font-semibold' 
+                    : 'hover:bg-yellow-400'
+                }`}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/results" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium transition-colors ${
+                  isActive('/results') 
+                    ? 'bg-yellow-600 text-black font-semibold' 
+                    : 'hover:bg-yellow-400'
+                }`}
+              >
+                Results
+              </Link>
+              <Link 
+                to="/tips" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium transition-colors ${
+                  isActive('/tips') 
+                    ? 'bg-yellow-600 text-black font-semibold' 
+                    : 'hover:bg-yellow-400'
+                }`}
+              >
+                Tips
+              </Link>
+              <Link 
+                to="/charts" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium transition-colors ${
+                  isActive('/charts') 
+                    ? 'bg-yellow-600 text-black font-semibold' 
+                    : 'hover:bg-yellow-400'
+                }`}
+              >
+                Charts
+              </Link>
+              <Link 
+                to="/about" 
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium transition-colors ${
+                  isActive('/about') 
+                    ? 'bg-yellow-600 text-black font-semibold' 
+                    : 'hover:bg-yellow-400'
+                }`}
+              >
+                About
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
+    </>
   )
 }

@@ -77,56 +77,56 @@ export default function LiveResults() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Live Results Management</h2>
-        <p className="text-gray-400">Manage live result updates</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Live Results Management</h2>
+        <p className="text-gray-400 text-sm sm:text-base">Manage live result updates</p>
       </div>
 
       {/* Live Results Form */}
-      <div className="bg-gray-800 rounded-lg p-6 border-2 border-yellow-600">
-        <h3 className="text-2xl font-bold text-yellow-400 mb-4">
+      <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
+        <h3 className="text-xl sm:text-2xl font-bold text-yellow-400 mb-4">
           {editingResultId ? 'Edit Live Result' : 'Add New Live Result'}
         </h3>
         <form onSubmit={handleResultSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-300 mb-2">Result Name</label>
+            <label className="block text-gray-300 mb-2 text-sm sm:text-base">Result Name</label>
             <input
               type="text"
               value={resultFormData.name}
               onChange={(e) => setResultFormData({ ...resultFormData, name: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+              className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm sm:text-base"
               required
               placeholder="e.g., BHOOTNATH NIGHT"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Result</label>
+              <label className="block text-gray-300 mb-2 text-sm sm:text-base">Result</label>
               <input
                 type="text"
                 value={resultFormData.result}
                 onChange={(e) => setResultFormData({ ...resultFormData, result: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm sm:text-base"
                 placeholder="e.g., 390-2 or Loading..."
               />
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Time Range</label>
+              <label className="block text-gray-300 mb-2 text-sm sm:text-base">Time Range</label>
               <input
                 type="text"
                 value={resultFormData.timeRange}
                 onChange={(e) => setResultFormData({ ...resultFormData, timeRange: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm sm:text-base"
                 required
                 placeholder="e.g., (7:00 PM - 10:00 PM)"
               />
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               type="submit"
-              className="px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500"
+              className="px-4 sm:px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 text-sm sm:text-base"
             >
               {editingResultId ? 'Update Result' : 'Add Result'}
             </button>
@@ -134,7 +134,7 @@ export default function LiveResults() {
               <button
                 type="button"
                 onClick={handleResultCancel}
-                className="px-6 py-2 bg-gray-600 text-white font-semibold rounded hover:bg-gray-500"
+                className="px-4 sm:px-6 py-2 bg-gray-600 text-white font-semibold rounded hover:bg-gray-500 text-sm sm:text-base"
               >
                 Cancel
               </button>
@@ -144,38 +144,38 @@ export default function LiveResults() {
       </div>
 
       {/* Live Results List */}
-      <div className="bg-gray-800 rounded-lg p-6 border-2 border-yellow-600">
-        <h3 className="text-2xl font-bold text-yellow-400 mb-4">Live Results List ({liveResults.length})</h3>
+      <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
+        <h3 className="text-xl sm:text-2xl font-bold text-yellow-400 mb-4">Live Results List ({liveResults.length})</h3>
         {liveResults.length === 0 ? (
-          <p className="text-gray-400 text-center py-8">No live results found. Add your first live result above.</p>
+          <p className="text-gray-400 text-center py-8 text-sm sm:text-base">No live results found. Add your first live result above.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {liveResults.map((result) => (
               <div
                 key={result._id}
-                className="bg-gray-700 rounded-lg p-4 border border-yellow-500/30"
+                className="bg-gray-700 rounded-lg p-3 sm:p-4 border border-yellow-500/30"
               >
-                <h4 className="text-xl font-bold text-yellow-400 mb-3">{result.name}</h4>
+                <h4 className="text-lg sm:text-xl font-bold text-yellow-400 mb-3">{result.name}</h4>
                 <div className="space-y-2 mb-4">
                   <div>
-                    <span className="text-gray-400 text-sm">Result: </span>
-                    <span className="text-green-400 font-bold">{result.result}</span>
+                    <span className="text-gray-400 text-xs sm:text-sm">Result: </span>
+                    <span className="text-green-400 font-bold text-sm sm:text-base">{result.result}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 text-sm">Time: </span>
-                    <span className="text-gray-300">{result.timeRange}</span>
+                    <span className="text-gray-400 text-xs sm:text-sm">Time: </span>
+                    <span className="text-gray-300 text-sm sm:text-base">{result.timeRange}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleResultEdit(result)}
-                    className="flex-1 px-4 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 text-sm"
+                    className="flex-1 px-3 sm:px-4 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 text-xs sm:text-sm"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleResultDelete(result._id)}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-500 text-sm"
+                    className="flex-1 px-3 sm:px-4 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-500 text-xs sm:text-sm"
                   >
                     Delete
                   </button>
