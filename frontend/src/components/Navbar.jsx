@@ -12,16 +12,26 @@ export default function Navbar() {
       <style>{`
         @keyframes scroll-right-to-left {
           0% {
-            transform: translateX(100%);
+            transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-33.333%);
           }
         }
+        .scrolling-text-container {
+          display: flex;
+          width: 100%;
+          overflow: hidden;
+          position: relative;
+        }
         .scrolling-text {
-          display: inline-block;
+          display: inline-flex;
+          white-space: nowrap;
           animation: scroll-right-to-left 20s linear infinite;
           will-change: transform;
+        }
+        .scrolling-text span {
+          padding-right: 20px;
         }
       `}</style>
       <nav className="bg-yellow-500 text-black shadow-md sticky top-0 z-50 w-full">
@@ -56,8 +66,12 @@ export default function Navbar() {
 
           {/* Scrolling Text - Mobile Only */}
           <div className="sm:hidden flex-1 overflow-hidden ml-2 mr-2 relative">
-            <div className="scrolling-text whitespace-nowrap text-xs font-semibold text-black">
-              India's no.1 betting prediction site • India's no.1 betting prediction site • India's no.1 betting prediction site • 
+            <div className="scrolling-text-container">
+              <div className="scrolling-text text-xs font-semibold text-black">
+                <span>India's no.1 betting prediction site • </span>
+                <span>India's no.1 betting prediction site • </span>
+                <span>India's no.1 betting prediction site • </span>
+              </div>
             </div>
           </div>
 

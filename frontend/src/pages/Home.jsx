@@ -325,7 +325,7 @@ export default function Home() {
               PLAYING SATTA MATKA WITH DPBOSS ONLINE
             </h2>
             <p className="text-gray-300 leading-relaxed text-center text-sm mb-3">
-              Dpbossonline.com is a top-notch online Matka industry leader providing 
+              Dpbossonline is a top-notch online Matka industry leader providing 
               fast and accurate results. We offer expert tips, live results, and a 
               comprehensive Matka experience.
             </p>
