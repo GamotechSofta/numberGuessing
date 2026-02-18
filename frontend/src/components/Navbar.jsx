@@ -15,7 +15,7 @@ export default function Navbar() {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-33.333%);
+            transform: translateX(-100%);
           }
         }
         .scrolling-text-container {
@@ -27,11 +27,11 @@ export default function Navbar() {
         .scrolling-text {
           display: inline-flex;
           white-space: nowrap;
-          animation: scroll-right-to-left 20s linear infinite;
+          animation: scroll-right-to-left 15s linear infinite;
           will-change: transform;
         }
         .scrolling-text span {
-          padding-right: 20px;
+          padding-right: 30px;
         }
       `}</style>
       <nav className="bg-yellow-500 text-black shadow-md sticky top-0 z-50 w-full">
@@ -68,6 +68,9 @@ export default function Navbar() {
           <div className="sm:hidden flex-1 overflow-hidden ml-2 mr-2 relative">
             <div className="scrolling-text-container">
               <div className="scrolling-text text-xs font-semibold text-black">
+                <span>India's no.1 betting prediction site • </span>
+                <span>India's no.1 betting prediction site • </span>
+                <span>India's no.1 betting prediction site • </span>
                 <span>India's no.1 betting prediction site • </span>
                 <span>India's no.1 betting prediction site • </span>
                 <span>India's no.1 betting prediction site • </span>
