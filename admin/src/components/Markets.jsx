@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 
-const API_URL = 'http://localhost:5000/api/markets'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const API_URL = `${API_BASE_URL}/api/markets`
 
 export default function Markets() {
   const [markets, setMarkets] = useState([])

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 
-const SETTINGS_URL = 'http://localhost:5000/api/settings'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const SETTINGS_URL = `${API_BASE_URL}/api/settings`
 
 export default function Settings() {
   const [settings, setSettings] = useState({

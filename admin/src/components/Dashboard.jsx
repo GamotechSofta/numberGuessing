@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 
-const API_URL = 'http://localhost:5000/api/markets'
-const LIVE_RESULTS_URL = 'http://localhost:5000/api/live-results'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const API_URL = `${API_BASE_URL}/api/markets`
+const LIVE_RESULTS_URL = `${API_BASE_URL}/api/live-results`
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ markets: 0, liveResults: 0 })

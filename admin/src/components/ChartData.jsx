@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 
-const CHART_DATA_URL = 'http://localhost:5000/api/chart-data'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const CHART_DATA_URL = `${API_BASE_URL}/api/chart-data`
 
 export default function ChartData() {
   const [charts, setCharts] = useState([])

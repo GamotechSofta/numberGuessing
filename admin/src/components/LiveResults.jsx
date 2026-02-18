@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 
-const LIVE_RESULTS_URL = 'http://localhost:5000/api/live-results'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const LIVE_RESULTS_URL = `${API_BASE_URL}/api/live-results`
 
 export default function LiveResults() {
   const [liveResults, setLiveResults] = useState([])
