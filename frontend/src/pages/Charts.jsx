@@ -112,19 +112,36 @@ export default function Charts() {
 
   const renderDayCell = (dayData) => {
     if (!dayData) {
-      return <td className="border border-gray-400 bg-white h-16 w-11 text-center text-gray-500">-</td>
+      return <td className="border border-gray-400 bg-white h-20 w-24 text-center text-gray-500">-</td>
     }
 
     const openFormatted = formatNumber(dayData.open, 3)
     const resultFormatted = formatNumber(dayData.result, 2)
     const closeFormatted = formatNumber(dayData.close, 3)
 
+    // Split into individual digits
+    const openDigits = openFormatted.split('')
+    const closeDigits = closeFormatted.split('')
+
     return (
-      <td className="border border-gray-400 bg-white p-1 h-16 w-11 align-top relative">
-        <div className="h-full flex flex-col justify-center items-center text-center">
-          <div className="text-[8px] text-gray-600 mb-0.5">O: {openFormatted}</div>
-          <div className="text-lg font-bold text-black">{resultFormatted}</div>
-          <div className="text-[8px] text-gray-600 mt-0.5">C: {closeFormatted}</div>
+      <td className="border border-gray-400 bg-white p-1 h-20 w-24 align-top relative">
+        <div className="h-full flex items-center justify-between px-1">
+          {/* Open digits - vertical on left */}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            {openDigits.map((digit, idx) => (
+              <div key={idx} className="text-xs font-semibold text-gray-700 leading-tight">{digit}</div>
+            ))}
+          </div>
+          
+          {/* Result - center, large and bold */}
+          <div className="text-xl font-bold text-black">{resultFormatted}</div>
+          
+          {/* Close digits - vertical on right */}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            {closeDigits.map((digit, idx) => (
+              <div key={idx} className="text-xs font-semibold text-gray-700 leading-tight">{digit}</div>
+            ))}
+          </div>
         </div>
       </td>
     )
@@ -184,13 +201,13 @@ export default function Charts() {
                   <thead>
                     <tr className="bg-yellow-600">
                       <th className="border border-gray-400 px-2 py-2 text-black font-bold text-sm w-32">Date</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Mon</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Tue</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Wed</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Thu</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Fri</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Sat</th>
-                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Sun</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Mon</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Tue</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Wed</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Thu</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Fri</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Sat</th>
+                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Sun</th>
                     </tr>
                   </thead>
                   <tbody>

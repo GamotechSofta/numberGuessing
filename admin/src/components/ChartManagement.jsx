@@ -17,6 +17,11 @@ export default function ChartManagement() {
     close: '',
     result: ''
   })
+  const [validationErrors, setValidationErrors] = useState({
+    open: '',
+    result: '',
+    close: ''
+  })
 
   useEffect(() => {
     fetchChartData()
@@ -120,6 +125,7 @@ export default function ChartManagement() {
         result: dayData.result || ''
       })
       setShowAddModal(true)
+      setValidationErrors({ open: '', result: '', close: '' })
     } else {
       // Empty cell - add new entry
       // Calculate date for this day in this week
@@ -142,18 +148,103 @@ export default function ChartManagement() {
       setShowAddModal(true)
     }
     setMessage({ type: '', text: '' })
+    setValidationErrors({ open: '', result: '', close: '' })
+  }
+
+  const validateInput = (field, value) => {
+    const errors = { ...validationErrors }
+    
+    if (field === 'open' || field === 'close') {
+      // Remove spaces and hyphens, keep only digits
+      const digits = value.replace(/[^\d]/g, '')
+      
+      if (digits.length > 3) {
+        errors[field] = 'Maximum 3 digits allowed'
+        setValidationErrors(errors)
+        return false
+      }
+      
+      if (digits.length === 3) {
+        // Check if digits are in ascending order
+        const sorted = digits.split('').sort().join('')
+        if (digits !== sorted) {
+          errors[field] = 'Digits must be in ascending order (e.g., 123, 234)'
+          setValidationErrors(errors)
+          return false
+        }
+      }
+      
+      errors[field] = ''
+    } else if (field === 'result') {
+      // Remove spaces and hyphens, keep only digits
+      const digits = value.replace(/[^\d]/g, '')
+      
+      if (digits.length > 2) {
+        errors[field] = 'Maximum 2 digits allowed'
+        setValidationErrors(errors)
+        return false
+      }
+      
+      errors[field] = ''
+    }
+    
+    setValidationErrors(errors)
+    return true
+  }
+
+  const validateAllFields = () => {
+    const openValid = validateInput('open', formData.open)
+    const resultValid = validateInput('result', formData.result)
+    const closeValid = validateInput('close', formData.close)
+    
+    // Check if all required fields have correct length
+    const openDigits = formData.open.replace(/[^\d]/g, '')
+    const resultDigits = formData.result.replace(/[^\d]/g, '')
+    const closeDigits = formData.close.replace(/[^\d]/g, '')
+    
+    if (openDigits.length !== 3) {
+      setValidationErrors(prev => ({ ...prev, open: 'Open must be exactly 3 digits' }))
+      return false
+    }
+    
+    if (resultDigits.length !== 2) {
+      setValidationErrors(prev => ({ ...prev, result: 'Result must be exactly 2 digits' }))
+      return false
+    }
+    
+    if (closeDigits.length !== 3) {
+      setValidationErrors(prev => ({ ...prev, close: 'Close must be exactly 3 digits' }))
+      return false
+    }
+    
+    return openValid && resultValid && closeValid
   }
 
   const handleSave = async (e) => {
     e.preventDefault()
+    
+    // Validate all fields before saving
+    if (!validateAllFields()) {
+      setMessage({ type: 'error', text: 'Please fix validation errors before saving.' })
+      return
+    }
+    
     try {
       setSaving(true)
       setMessage({ type: '', text: '' })
       
+      // Clean the input - remove spaces and hyphens, keep only digits
+      const openDigits = formData.open.replace(/[^\d]/g, '')
+      const resultDigits = formData.result.replace(/[^\d]/g, '')
+      const closeDigits = formData.close.replace(/[^\d]/g, '')
+      
       // Ensure marketName is always KALYAN
       const dataToSave = {
         ...formData,
-        marketName: 'KALYAN'
+        marketName: 'KALYAN',
+        open: openDigits,
+        close: closeDigits,
+        result: resultDigits
       }
       
       let response
@@ -230,7 +321,7 @@ export default function ChartManagement() {
     if (!dayData) {
       return (
         <td 
-          className="border border-gray-400 bg-white h-16 w-11 text-center text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
+          className="border border-gray-400 bg-white h-20 w-24 text-center text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
           onClick={() => handleCellClick(weekKey, day, null)}
         >
           <div className="h-full flex items-center justify-center">
@@ -244,15 +335,32 @@ export default function ChartManagement() {
     const resultFormatted = formatNumber(dayData.result, 2)
     const closeFormatted = formatNumber(dayData.close, 3)
 
+    // Split into individual digits
+    const openDigits = openFormatted.split('')
+    const closeDigits = closeFormatted.split('')
+
     return (
       <td 
-        className="border border-gray-400 bg-white p-1 h-16 w-11 align-top relative cursor-pointer hover:bg-gray-100 transition-colors group"
+        className="border border-gray-400 bg-white p-1 h-20 w-24 align-top relative cursor-pointer hover:bg-gray-100 transition-colors group"
         onClick={() => handleCellClick(weekKey, day, dayData)}
       >
-        <div className="h-full flex flex-col justify-center items-center text-center">
-          <div className="text-[8px] text-gray-600 mb-0.5">O: {openFormatted}</div>
-          <div className="text-lg font-bold text-black">{resultFormatted}</div>
-          <div className="text-[8px] text-gray-600 mt-0.5">C: {closeFormatted}</div>
+        <div className="h-full flex items-center justify-between px-1">
+          {/* Open digits - vertical on left */}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            {openDigits.map((digit, idx) => (
+              <div key={idx} className="text-xs font-semibold text-gray-700 leading-tight">{digit}</div>
+            ))}
+          </div>
+          
+          {/* Result - center, large and bold */}
+          <div className="text-xl font-bold text-black">{resultFormatted}</div>
+          
+          {/* Close digits - vertical on right */}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            {closeDigits.map((digit, idx) => (
+              <div key={idx} className="text-xs font-semibold text-gray-700 leading-tight">{digit}</div>
+            ))}
+          </div>
         </div>
         <button
           onClick={(e) => {
@@ -313,6 +421,7 @@ export default function ChartManagement() {
               })
               setShowAddModal(true)
               setMessage({ type: '', text: '' })
+              setValidationErrors({ open: '', result: '', close: '' })
             }}
             className="px-4 sm:px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 transition-colors text-sm sm:text-base whitespace-nowrap"
           >
@@ -336,13 +445,13 @@ export default function ChartManagement() {
               <thead>
                 <tr className="bg-yellow-600">
                   <th className="border border-gray-400 px-2 py-2 text-black font-bold text-sm w-32">Date</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Mon</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Tue</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Wed</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Thu</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Fri</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Sat</th>
-                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Sun</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Mon</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Tue</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Wed</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Thu</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Fri</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Sat</th>
+                  <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Sun</th>
                 </tr>
               </thead>
               <tbody>
@@ -374,6 +483,7 @@ export default function ChartManagement() {
             setEditingCell(null)
             setFormData({ date: '', marketName: 'KALYAN', open: '', close: '', result: '' })
             setMessage({ type: '', text: '' })
+            setValidationErrors({ open: '', result: '', close: '' })
           }
         }}>
           <div className="bg-gray-800 rounded-lg p-6 border-2 border-yellow-600 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -405,45 +515,81 @@ export default function ChartManagement() {
               </div>
               <div className="grid grid-cols-3 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-gray-300 mb-2 text-sm sm:text-base font-semibold">Open</label>
+                  <label className="block text-gray-300 mb-2 text-sm sm:text-base font-semibold">Open <span className="text-yellow-400">(3 digits, ascending)</span></label>
                   <input
                     type="text"
                     value={formData.open}
-                    onChange={(e) => setFormData({ ...formData, open: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm sm:text-base"
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Allow only digits, max 3
+                      const digits = value.replace(/[^\d]/g, '')
+                      if (digits.length <= 3) {
+                        setFormData({ ...formData, open: digits })
+                        validateInput('open', digits)
+                      }
+                    }}
+                    className={`w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border ${
+                      validationErrors.open ? 'border-red-500' : 'border-gray-600 focus:border-yellow-500'
+                    } focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm sm:text-base`}
                     required
-                    placeholder="e.g., 380"
+                    placeholder="e.g., 123"
                     disabled={saving}
+                    maxLength={3}
                   />
+                  {validationErrors.open && (
+                    <p className="text-red-400 text-xs mt-1">{validationErrors.open}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-gray-300 mb-2 text-sm sm:text-base font-semibold">Result</label>
+                  <label className="block text-gray-300 mb-2 text-sm sm:text-base font-semibold">Result <span className="text-yellow-400">(2 digits)</span></label>
                   <input
                     type="text"
                     value={formData.result}
                     onChange={(e) => {
                       const value = e.target.value
-                      // Allow numbers only
-                      if (value === '' || /^\d*$/.test(value)) {
-                        setFormData({ ...formData, result: value })
+                      // Allow only digits, max 2
+                      const digits = value.replace(/[^\d]/g, '')
+                      if (digits.length <= 2) {
+                        setFormData({ ...formData, result: digits })
+                        validateInput('result', digits)
                       }
                     }}
-                    className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm sm:text-base"
+                    className={`w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border ${
+                      validationErrors.result ? 'border-red-500' : 'border-gray-600 focus:border-yellow-500'
+                    } focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm sm:text-base`}
                     placeholder="e.g., 19"
                     disabled={saving}
+                    maxLength={2}
                   />
+                  {validationErrors.result && (
+                    <p className="text-red-400 text-xs mt-1">{validationErrors.result}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-gray-300 mb-2 text-sm sm:text-base font-semibold">Close</label>
+                  <label className="block text-gray-300 mb-2 text-sm sm:text-base font-semibold">Close <span className="text-yellow-400">(3 digits, ascending)</span></label>
                   <input
                     type="text"
                     value={formData.close}
-                    onChange={(e) => setFormData({ ...formData, close: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm sm:text-base"
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Allow only digits, max 3
+                      const digits = value.replace(/[^\d]/g, '')
+                      if (digits.length <= 3) {
+                        setFormData({ ...formData, close: digits })
+                        validateInput('close', digits)
+                      }
+                    }}
+                    className={`w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded border ${
+                      validationErrors.close ? 'border-red-500' : 'border-gray-600 focus:border-yellow-500'
+                    } focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm sm:text-base`}
                     required
-                    placeholder="e.g., 180"
+                    placeholder="e.g., 456"
                     disabled={saving}
+                    maxLength={3}
                   />
+                  {validationErrors.close && (
+                    <p className="text-red-400 text-xs mt-1">{validationErrors.close}</p>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
@@ -461,6 +607,7 @@ export default function ChartManagement() {
                     setEditingCell(null)
                     setFormData({ date: '', marketName: 'KALYAN', open: '', close: '', result: '' })
                     setMessage({ type: '', text: '' })
+                    setValidationErrors({ open: '', result: '', close: '' })
                   }}
                   disabled={saving}
                   className="px-4 sm:px-6 py-2 bg-gray-600 text-white font-semibold rounded hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
