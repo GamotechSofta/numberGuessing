@@ -68,6 +68,43 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 5 Top Markets Guessing Section */}
+      <section className="w-full py-6 px-4 border-t border-yellow-600 bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-yellow-400 text-lg font-semibold mb-4 text-center">
+            Top 5 Markets Guessing
+          </h2>
+          {loading ? (
+            <div className="text-center text-gray-400 py-8 text-sm">Loading markets...</div>
+          ) : markets.length === 0 ? (
+            <div className="text-center text-gray-400 py-8 text-sm">No markets available</div>
+          ) : (
+            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-3 overflow-x-auto sm:overflow-visible">
+              {markets.map((market) => (
+                <div
+                  key={market._id || market.id}
+                  className="bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-700 flex-shrink-0 w-[140px] sm:w-auto"
+                >
+                  <h3 className="text-yellow-400 font-semibold mb-2 sm:mb-3 text-center text-xs sm:text-sm">
+                    {market.name}
+                  </h3>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <div>
+                      <p className="text-white text-[10px] sm:text-xs mb-0.5 sm:mb-1">Open</p>
+                      <p className="text-green-400 text-sm sm:text-lg font-bold">{market.open}</p>
+                    </div>
+                    <div>
+                      <p className="text-white text-[10px] sm:text-xs mb-0.5 sm:mb-1">Close</p>
+                      <p className="text-green-400 text-sm sm:text-lg font-bold">{market.close}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Quick Stats Section */}
       <section className="w-full py-6 px-4 border-t border-yellow-600 bg-gray-900">
         <div className="max-w-6xl mx-auto">
@@ -92,43 +129,6 @@ export default function Home() {
               <p className="text-green-400 text-sm font-bold">Active</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* 5 Top Markets Guessing Section */}
-      <section className="w-full py-6 px-4 border-t border-yellow-600 bg-gray-900">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-yellow-400 text-lg font-semibold mb-4 text-center">
-            Top 5 Markets Guessing
-          </h2>
-          {loading ? (
-            <div className="text-center text-gray-400 py-8 text-sm">Loading markets...</div>
-          ) : markets.length === 0 ? (
-            <div className="text-center text-gray-400 py-8 text-sm">No markets available</div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {markets.map((market) => (
-                <div
-                  key={market._id || market.id}
-                  className="bg-gray-800 rounded-lg p-4 border border-gray-700"
-                >
-                  <h3 className="text-yellow-400 font-semibold mb-3 text-center text-sm">
-                    {market.name}
-                  </h3>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-white text-xs mb-1">Open</p>
-                      <p className="text-green-400 text-lg font-bold">{market.open}</p>
-                    </div>
-                    <div>
-                      <p className="text-white text-xs mb-1">Close</p>
-                      <p className="text-green-400 text-lg font-bold">{market.close}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

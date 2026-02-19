@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
 const API_URL = `${API_BASE_URL}/api/markets`
 const LIVE_RESULTS_URL = `${API_BASE_URL}/api/live-results`
+const DAILY_RESULTS_URL = `${API_BASE_URL}/api/daily-results`
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({ markets: 0, liveResults: 0 })
+  const [stats, setStats] = useState({ markets: 0, liveResults: 0, dailyResults: 0 })
 
   useEffect(() => {
     fetchStats()
@@ -13,13 +14,19 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const [marketsRes, resultsRes] = await Promise.all([
+      const [marketsRes, resultsRes, dailyResultsRes] = await Promise.all([
         fetch(API_URL),
-        fetch(LIVE_RESULTS_URL)
+        fetch(LIVE_RESULTS_URL),
+        fetch(DAILY_RESULTS_URL)
       ])
       const markets = await marketsRes.json()
       const results = await resultsRes.json()
-      setStats({ markets: markets.length, liveResults: results.length })
+      const dailyResults = await dailyResultsRes.json()
+      setStats({ 
+        markets: markets.length, 
+        liveResults: results.length,
+        dailyResults: dailyResults.length
+      })
     } catch (error) {
       console.error('Error fetching stats:', error)
     }
@@ -53,13 +60,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600 sm:col-span-2 lg:col-span-1">
+        <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs sm:text-sm mb-1">Total Items</p>
-              <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.markets + stats.liveResults}</p>
+              <p className="text-gray-400 text-xs sm:text-sm mb-1">Daily Results</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.dailyResults}</p>
             </div>
-            <div className="text-3xl sm:text-4xl">📊</div>
+            <div className="text-3xl sm:text-4xl">📅</div>
           </div>
         </div>
       </div>

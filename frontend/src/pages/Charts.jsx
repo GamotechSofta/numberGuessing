@@ -1,112 +1,158 @@
 import { useState, useEffect } from 'react'
-import { parseHtmlChart } from '../utils/parseHtmlChart'
 
 export default function Charts() {
-  const [htmlCharts, setHtmlCharts] = useState([])
-  const [htmlMarkets, setHtmlMarkets] = useState([]) // Market data with name and charts
-  const [expandedMarkets, setExpandedMarkets] = useState({}) // Track which markets are expanded
+  const [charts, setCharts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetchHtmlData()
+    fetchChartData()
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchChartData, 30000)
+    return () => clearInterval(interval)
   }, [])
 
-
-  const fetchHtmlData = async () => {
+  const fetchChartData = async () => {
     try {
-      const response = await fetch('/full-page.html')
-      const htmlContent = await response.text()
-      const parsedCharts = parseHtmlChart(htmlContent)
-      setHtmlCharts(parsedCharts)
+      setLoading(true)
+      setError(null)
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
       
-      // Group charts by market (for now, all are Kalyan Market)
-      // In the future, this can be extended to support multiple markets
-      const markets = [
-        {
-          name: 'Kalyan Market',
-          charts: parsedCharts
+      // Fetch all daily results from database
+      const response = await fetch(`${API_BASE_URL}/api/daily-results`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const dbResults = await response.json()
+      
+      // Transform database data into table format grouped by week
+      const weekMap = {}
+      
+      dbResults.forEach(result => {
+        const resultDate = new Date(result.date)
+        const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][resultDate.getDay()]
+        
+        // Find the week this date belongs to (Monday to Sunday)
+        const monday = new Date(resultDate)
+        const day = resultDate.getDay()
+        const diff = resultDate.getDate() - day + (day === 0 ? -6 : 1) // Adjust to Monday
+        monday.setDate(diff)
+        monday.setHours(0, 0, 0, 0)
+        
+        const sunday = new Date(monday)
+        sunday.setDate(sunday.getDate() + 6)
+        
+        const formatDate = (date) => {
+          const dd = String(date.getDate()).padStart(2, '0')
+          const mm = String(date.getMonth() + 1).padStart(2, '0')
+          const yyyy = date.getFullYear()
+          return `${dd}-${mm}-${yyyy}`
         }
-      ]
-      setHtmlMarkets(markets)
-      setLoading(false)
+        
+        const weekKey = `${formatDate(monday)}to${formatDate(sunday)}`
+        
+        if (!weekMap[weekKey]) {
+          weekMap[weekKey] = {
+            week: weekKey,
+            Mon: null,
+            Tue: null,
+            Wed: null,
+            Thu: null,
+            Fri: null,
+            Sat: null,
+            Sun: null
+          }
+        }
+        
+        // Store the day data
+        weekMap[weekKey][dayOfWeek] = {
+          open: result.open,
+          close: result.close,
+          result: result.result || ''
+        }
+      })
       
-      // Markets are closed by default (no expansion)
+      // Convert to array and sort by date
+      const charts = Object.values(weekMap).sort((a, b) => {
+        // Parse the start date from week string (format: "DD-MM-YYYYtoDD-MM-YYYY")
+        const parseWeekDate = (weekStr) => {
+          const startDateStr = weekStr.split('to')[0] // Get first part: "DD-MM-YYYY"
+          const [day, month, year] = startDateStr.split('-').map(Number)
+          return new Date(year, month - 1, day) // month is 0-indexed in Date
+        }
+        
+        const dateA = parseWeekDate(a.week)
+        const dateB = parseWeekDate(b.week)
+        
+        // Sort descending (newest first)
+        return dateB - dateA
+      })
+      
+      setCharts(charts)
+      setLoading(false)
     } catch (error) {
-      console.error('Error fetching HTML data:', error)
+      console.error('Error fetching chart data:', error)
+      setError('Failed to load chart data. Please try again later.')
       setLoading(false)
     }
   }
 
-  const toggleMarket = (marketName) => {
-    setExpandedMarkets(prev => ({
-      ...prev,
-      [marketName]: !prev[marketName]
-    }))
+  const formatWeekDate = (weekStr) => {
+    // Convert "28-09-2020to04-10-2020" to "28/09/2020 to 04/10/2020"
+    return weekStr.replace(/(\d{2})-(\d{2})-(\d{4})to(\d{2})-(\d{2})-(\d{4})/, '$1/$2/$3 to $4/$5/$6')
+  }
+
+  const formatNumber = (value, digits) => {
+    if (!value) return '-'
+    // Remove spaces and hyphens, then pad with leading zeros
+    const cleaned = value.toString().replace(/[\s-]/g, '')
+    if (!cleaned) return '-'
+    return cleaned.padStart(digits, '0')
   }
 
   const renderDayCell = (dayData) => {
-    if (!dayData) return <td className="border border-gray-700 px-2 sm:px-3 py-2 text-center align-middle bg-white text-xs">-</td>
-    
-    // Check if it's the new object format or old string format
-    if (typeof dayData === 'object' && dayData !== null && 'mainNumber' in dayData) {
-      const { mainNumber, isHighlighted, leftNumbers = [], rightNumbers = [], hasAsterisk, asteriskCount = 0 } = dayData
-      
-      return (
-        <td className="border border-gray-700 px-2 sm:px-3 py-2 text-center align-middle bg-white">
-          <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-            {/* Left numbers */}
-            <div className="flex flex-col items-end gap-0.5 text-[9px] sm:text-[10px] text-gray-600">
-              {leftNumbers.map((num, idx) => (
-                <span key={`left-${idx}`}>{num}</span>
-              ))}
-              {hasAsterisk && Array(asteriskCount).fill(0).map((_, idx) => (
-                <span key={`left-ast-${idx}`} className="text-gray-400">*</span>
-              ))}
-            </div>
-            
-            {/* Main number */}
-            <div className={`text-base sm:text-lg md:text-xl font-bold mx-1 ${isHighlighted ? 'text-red-500' : 'text-gray-900'}`}>
-              {mainNumber || (hasAsterisk ? '**' : '-')}
-            </div>
-            
-            {/* Right numbers */}
-            <div className="flex flex-col items-start gap-0.5 text-[9px] sm:text-[10px] text-gray-600">
-              {rightNumbers.map((num, idx) => (
-                <span key={`right-${idx}`}>{num}</span>
-              ))}
-              {hasAsterisk && Array(asteriskCount).fill(0).map((_, idx) => (
-                <span key={`right-ast-${idx}`} className="text-gray-400">*</span>
-              ))}
-            </div>
-          </div>
-        </td>
-      )
-    } else {
-      // Old string format - handle backward compatibility
-      const value = dayData || ''
-      const lines = value.split('\n').filter(line => line.trim())
-      
-      return (
-        <td className="border border-gray-700 px-2 sm:px-3 py-2 text-center text-gray-900 font-semibold bg-white text-xs">
-          {lines.length > 0 ? (
-            <div className="flex flex-col gap-0.5">
-              {lines.map((line, index) => (
-                <span key={index} className="block">{line}</span>
-              ))}
-            </div>
-          ) : '-'}
-        </td>
-      )
+    if (!dayData) {
+      return <td className="border border-gray-400 bg-white h-16 w-11 text-center text-gray-500">-</td>
     }
+
+    const openFormatted = formatNumber(dayData.open, 3)
+    const resultFormatted = formatNumber(dayData.result, 2)
+    const closeFormatted = formatNumber(dayData.close, 3)
+
+    return (
+      <td className="border border-gray-400 bg-white p-1 h-16 w-11 align-top relative">
+        <div className="h-full flex flex-col justify-center items-center text-center">
+          <div className="text-[8px] text-gray-600 mb-0.5">O: {openFormatted}</div>
+          <div className="text-lg font-bold text-black">{resultFormatted}</div>
+          <div className="text-[8px] text-gray-600 mt-0.5">C: {closeFormatted}</div>
+        </div>
+      </td>
+    )
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-white w-full">
-        <div className="w-full py-8 px-4 sm:px-6 lg:px-8 border-t-2 border-yellow-600">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center text-gray-400 py-8">Loading chart data...</div>
-          </div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mb-4"></div>
+          <div className="text-gray-400 font-bold text-xl">Loading chart data...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-2xl mb-4">⚠️</div>
+          <div className="text-red-400 font-bold text-xl mb-2">{error}</div>
+          <button
+            onClick={fetchChartData}
+            className="px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     )
@@ -116,86 +162,67 @@ export default function Charts() {
     <div className="min-h-screen bg-gray-900 text-white w-full">
       <div className="w-full py-6 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-yellow-400 mb-6 text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-yellow-400 mb-2 text-center">
             Market Analysis Charts
           </h1>
+          <p className="text-gray-400 text-sm text-center mb-6">KALYAN Market</p>
 
-          {/* HTML Data */}
-          {htmlMarkets.length === 0 ? (
-            <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
-              <p className="text-center text-gray-400 py-8 text-sm sm:text-base">No HTML chart data available</p>
+          {charts.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="bg-gray-800 rounded-lg p-8 border-2 border-yellow-600">
+                <div className="text-yellow-400 text-2xl mb-4">📊</div>
+                <h2 className="text-xl font-semibold text-white mb-2">No Chart Data Available</h2>
+                <p className="text-gray-400 text-sm">
+                  Chart data will appear here once it's added from admin panel.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
-              {htmlMarkets.map((market) => {
-                const isExpanded = expandedMarkets[market.name] || false
-                return (
-                  <div key={market.name} className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-                    {/* Market Header - Clickable */}
-                    <button
-                      onClick={() => toggleMarket(market.name)}
-                      className="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-gray-800 hover:bg-gray-750 transition-colors"
-                    >
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-base sm:text-lg">{isExpanded ? '▼' : '▶'}</span>
-                        <span className="text-gray-400 text-sm sm:text-base font-medium">Panel</span>
-                        <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-yellow-400">{market.name}</h2>
-                      </div>
-                    </button>
-                    
-                    {/* Market Table - Collapsible */}
-                    {isExpanded && (
-                      <div className="p-3 sm:p-4 border-t border-gray-700 overflow-x-auto">
-                        <div className="overflow-x-auto">
-                          <table className="w-full border-collapse min-w-[600px]">
-                            <thead>
-                              <tr className="bg-yellow-500">
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-left text-xs">Date</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Mon</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Tue</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Wed</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Thu</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Fri</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Sat</th>
-                                <th className="border border-gray-600 px-2 sm:px-3 py-2 text-black font-semibold text-xs">Sun</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {market.charts.map((chart, index) => (
-                                <tr key={`${market.name}-${index}`} className="bg-gray-800 hover:bg-gray-750 transition-colors">
-                                  <td className="border border-gray-700 px-2 sm:px-3 py-2 text-white font-medium bg-gray-800 text-xs">
-                                    {chart.Date || '-'}
-                                  </td>
-                                  {renderDayCell(chart.Mon)}
-                                  {renderDayCell(chart.Tue)}
-                                  {renderDayCell(chart.Wed)}
-                                  {renderDayCell(chart.Thu)}
-                                  {renderDayCell(chart.Fri)}
-                                  {renderDayCell(chart.Sat)}
-                                  {renderDayCell(chart.Sun)}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
+            <>
+              <div className="overflow-x-auto mb-6">
+                <table className="w-full border-collapse bg-white min-w-[600px] max-w-[800px] mx-auto shadow-lg">
+                  <thead>
+                    <tr className="bg-yellow-600">
+                      <th className="border border-gray-400 px-2 py-2 text-black font-bold text-sm w-32">Date</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Mon</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Tue</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Wed</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Thu</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Fri</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Sat</th>
+                      <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm">Sun</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {charts.map((chart, index) => (
+                      <tr key={`chart-${index}`}>
+                        {/* Date Column */}
+                        <td className="border border-gray-400 bg-white px-2 py-2 text-black font-semibold text-[10px] text-center align-middle whitespace-pre-line leading-tight w-32">
+                          {formatWeekDate(chart.week).replace(' to ', '\nto\n')}
+                        </td>
+                        {renderDayCell(chart.Mon)}
+                        {renderDayCell(chart.Tue)}
+                        {renderDayCell(chart.Wed)}
+                        {renderDayCell(chart.Thu)}
+                        {renderDayCell(chart.Fri)}
+                        {renderDayCell(chart.Sat)}
+                        {renderDayCell(chart.Sun)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          <div className="mt-6 bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
-            <h2 className="text-lg sm:text-xl font-semibold text-yellow-400 mb-3">How to Analyze</h2>
-            <div className="text-gray-300 text-sm sm:text-base leading-relaxed space-y-2">
-              <p>• Review the main numbers (large center numbers) for each day</p>
-              <p>• Check the small numbers on the left and right sides</p>
-              <p>• Red highlighted numbers indicate special significance</p>
-              <p>• Look for patterns and trends across different dates</p>
-              <p>• Use this data to make informed predictions</p>
-            </div>
-          </div>
+              <div className="mt-6 p-4 border border-yellow-600 bg-gray-800 rounded-lg">
+                <h2 className="text-lg font-semibold text-yellow-400 mb-2">Chart Guide</h2>
+                <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1">
+                  <li><strong>O:</strong> Opening number</li>
+                  <li><strong>Center Number:</strong> Result number</li>
+                  <li><strong>C:</strong> Closing number</li>
+                </ul>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

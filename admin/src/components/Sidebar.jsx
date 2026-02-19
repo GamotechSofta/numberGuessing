@@ -3,7 +3,8 @@ export default function Sidebar({ activeSection, setActiveSection, sidebarOpen, 
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'markets', label: 'Markets', icon: '📈' },
     { id: 'live-results', label: 'Live Results', icon: '⚡' },
-    { id: 'chart-data', label: 'Chart Data', icon: '📉' },
+    { id: 'daily-results', label: 'Daily Results', icon: '📅' },
+    { id: 'chart-management', label: 'Chart Management', icon: '📉' },
     { id: 'settings', label: 'Settings', icon: '⚙️' }
   ]
 

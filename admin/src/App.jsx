@@ -4,7 +4,8 @@ import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Markets from './components/Markets'
 import LiveResults from './components/LiveResults'
-import ChartData from './components/ChartData'
+import DailyResults from './components/DailyResults'
+import ChartManagement from './components/ChartManagement'
 import Settings from './components/Settings'
 
 function App() {
@@ -19,8 +20,10 @@ function App() {
         return <Markets />
       case 'live-results':
         return <LiveResults />
-      case 'chart-data':
-        return <ChartData />
+      case 'daily-results':
+        return <DailyResults />
+      case 'chart-management':
+        return <ChartManagement />
       case 'settings':
         return <Settings />
       default:
@@ -46,7 +49,7 @@ function App() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-    </div>
+      </div>
   )
 }
 

@@ -2,10 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const fs = require('fs').promises;
+const path = require('path');
 const Market = require('./models/Market');
 const LiveResult = require('./models/LiveResult');
 const Setting = require('./models/Setting');
 const ChartData = require('./models/ChartData');
+const DailyResult = require('./models/DailyResult');
+const HtmlChartData = require('./models/HtmlChartData');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -573,11 +577,369 @@ app.get('/api/number-data/charts/all', async (req, res) => {
   }
 });
 
+// ========== HTML CHART DATA API ==========
+
+// GET all HTML chart data
+app.get('/api/html-chart-data', async (req, res) => {
+  try {
+    const { marketName } = req.query;
+    const query = {};
+    
+    if (marketName) {
+      query.marketName = marketName;
+    }
+    
+    const charts = await HtmlChartData.find(query).sort({ order: 1, createdAt: -1 });
+    res.json(charts);
+  } catch (error) {
+    console.error('Error fetching HTML chart data:', error);
+    res.status(500).json({ error: 'Failed to fetch HTML chart data' });
+  }
+});
+
+// GET single HTML chart entry by ID
+app.get('/api/html-chart-data/:id', async (req, res) => {
+  try {
+    const chart = await HtmlChartData.findById(req.params.id);
+    if (!chart) {
+      return res.status(404).json({ error: 'Chart entry not found' });
+    }
+    res.json(chart);
+  } catch (error) {
+    console.error('Error fetching HTML chart entry:', error);
+    res.status(500).json({ error: 'Failed to fetch HTML chart entry' });
+  }
+});
+
+// POST create new HTML chart entry
+app.post('/api/html-chart-data', async (req, res) => {
+  try {
+    const { Date, Mon, Tue, Wed, Thu, Fri, Sat, Sun, marketName, order } = req.body;
+    
+    if (!Date) {
+      return res.status(400).json({ error: 'Date is required' });
+    }
+
+    const newChart = new HtmlChartData({
+      Date: Date.trim(),
+      Mon: Mon || null,
+      Tue: Tue || null,
+      Wed: Wed || null,
+      Thu: Thu || null,
+      Fri: Fri || null,
+      Sat: Sat || null,
+      Sun: Sun || null,
+      marketName: marketName || 'Kalyan Market',
+      order: order || 0
+    });
+
+    const savedChart = await newChart.save();
+    res.status(201).json(savedChart);
+  } catch (error) {
+    console.error('Error creating HTML chart entry:', error);
+    res.status(500).json({ error: 'Failed to create HTML chart entry' });
+  }
+});
+
+// PUT update HTML chart entry
+app.put('/api/html-chart-data/:id', async (req, res) => {
+  try {
+    const { Date, Mon, Tue, Wed, Thu, Fri, Sat, Sun, marketName, order } = req.body;
+    const updateData = {};
+    
+    if (Date) updateData.Date = Date.trim();
+    if (Mon !== undefined) updateData.Mon = Mon;
+    if (Tue !== undefined) updateData.Tue = Tue;
+    if (Wed !== undefined) updateData.Wed = Wed;
+    if (Thu !== undefined) updateData.Thu = Thu;
+    if (Fri !== undefined) updateData.Fri = Fri;
+    if (Sat !== undefined) updateData.Sat = Sat;
+    if (Sun !== undefined) updateData.Sun = Sun;
+    if (marketName) updateData.marketName = marketName;
+    if (order !== undefined) updateData.order = order;
+
+    const chart = await HtmlChartData.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!chart) {
+      return res.status(404).json({ error: 'Chart entry not found' });
+    }
+
+    res.json(chart);
+  } catch (error) {
+    console.error('Error updating HTML chart entry:', error);
+    res.status(500).json({ error: 'Failed to update HTML chart entry' });
+  }
+});
+
+// DELETE HTML chart entry
+app.delete('/api/html-chart-data/:id', async (req, res) => {
+  try {
+    const chart = await HtmlChartData.findByIdAndDelete(req.params.id);
+    
+    if (!chart) {
+      return res.status(404).json({ error: 'Chart entry not found' });
+    }
+
+    res.json({ message: 'Chart entry deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting HTML chart entry:', error);
+    res.status(500).json({ error: 'Failed to delete HTML chart entry' });
+  }
+});
+
+// POST bulk import HTML chart data (for initial import from HTML file)
+app.post('/api/html-chart-data/bulk', async (req, res) => {
+  try {
+    const { charts } = req.body;
+    
+    if (!Array.isArray(charts) || charts.length === 0) {
+      return res.status(400).json({ error: 'Charts array is required' });
+    }
+
+    // Clear existing data if needed
+    if (req.query.replace === 'true') {
+      await HtmlChartData.deleteMany({});
+    }
+
+    const savedCharts = await HtmlChartData.insertMany(charts);
+    res.status(201).json({ message: `Successfully imported ${savedCharts.length} chart entries`, count: savedCharts.length });
+  } catch (error) {
+    console.error('Error bulk importing HTML chart data:', error);
+    res.status(500).json({ error: 'Failed to bulk import HTML chart data' });
+  }
+});
+
+// ========== SEED JSON DATA TO DATABASE ==========
+
+// Function to convert week_range and day to actual date
+function getDateFromWeekRange(weekRange, day) {
+  // weekRange format: "28-09-2020 to 04-10-2020"
+  // day format: "Mon", "Tue", etc.
+  const [startDateStr] = weekRange.split(' to ');
+  const [dayNum, monthNum, yearNum] = startDateStr.split('-').map(Number);
+  
+  // Start from Monday of that week
+  const monday = new Date(yearNum, monthNum - 1, dayNum);
+  const dayOfWeek = monday.getDay();
+  const diff = monday.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+  monday.setDate(diff);
+  
+  // Map day name to offset from Monday
+  const dayMap = { 'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Sat': 5, 'Sun': 6 };
+  const offset = dayMap[day] || 0;
+  
+  const targetDate = new Date(monday);
+  targetDate.setDate(targetDate.getDate() + offset);
+  targetDate.setHours(0, 0, 0, 0);
+  
+  return targetDate;
+}
+
+// POST endpoint to seed JSON data into database
+app.post('/api/daily-results/seed', async (req, res) => {
+  try {
+    const jsonFilePath = path.join(__dirname, '..', 'frontend', 'src', 'data', 'daywise_open_close_result.json');
+    const fileContent = await fs.readFile(jsonFilePath, 'utf8');
+    const jsonData = JSON.parse(fileContent);
+    
+    let imported = 0;
+    let updated = 0;
+    let errors = 0;
+    const errorDetails = [];
+    
+    for (const item of jsonData) {
+      try {
+        const weekRange = item.week_range || item.week;
+        if (!weekRange || !item.day) {
+          errors++;
+          continue;
+        }
+        
+        const date = getDateFromWeekRange(weekRange, item.day);
+        const marketName = 'KALYAN'; // Default market name
+        
+        // Check if entry already exists
+        const existing = await DailyResult.findOne({
+          date: date,
+          marketName: marketName
+        });
+        
+        const resultData = {
+          date: date,
+          marketName: marketName,
+          open: (item.open || '').trim(),
+          close: (item.close || '').trim(),
+          result: (item.result || '').trim()
+        };
+        
+        if (existing) {
+          // Update existing
+          await DailyResult.findByIdAndUpdate(existing._id, resultData);
+          updated++;
+        } else {
+          // Create new
+          await DailyResult.create(resultData);
+          imported++;
+        }
+      } catch (error) {
+        console.error(`Error processing item:`, item, error.message);
+        errors++;
+        errorDetails.push({ item, error: error.message });
+      }
+    }
+    
+    res.json({
+      message: 'Seeding completed',
+      imported,
+      updated,
+      errors,
+      total: jsonData.length,
+      errorDetails: errorDetails.slice(0, 10) // First 10 errors
+    });
+  } catch (error) {
+    console.error('Error seeding data:', error);
+    res.status(500).json({ error: 'Failed to seed data', details: error.message });
+  }
+});
+
+// ========== DAILY RESULTS API ==========
+
+// GET all daily results
+app.get('/api/daily-results', async (req, res) => {
+  try {
+    const { date, marketName } = req.query;
+    const query = {};
+    
+    if (date) {
+      // Parse date and set to start of day
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      query.date = { $gte: startOfDay, $lte: endOfDay };
+    }
+    
+    if (marketName) {
+      query.marketName = marketName.toUpperCase();
+    }
+    
+    const results = await DailyResult.find(query).sort({ date: -1, marketName: 1 });
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching daily results:', error);
+    res.status(500).json({ error: 'Failed to fetch daily results' });
+  }
+});
+
+// GET single daily result by ID
+app.get('/api/daily-results/:id', async (req, res) => {
+  try {
+    const result = await DailyResult.findById(req.params.id);
+    if (!result) {
+      return res.status(404).json({ error: 'Daily result not found' });
+    }
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching daily result:', error);
+    res.status(500).json({ error: 'Failed to fetch daily result' });
+  }
+});
+
+// POST create new daily result
+app.post('/api/daily-results', async (req, res) => {
+  try {
+    const { date, marketName, open, close, result } = req.body;
+    
+    if (!date || !marketName || !open || !close) {
+      return res.status(400).json({ error: 'Date, marketName, open, and close are required' });
+    }
+
+    // Parse date and set to start of day
+    const resultDate = new Date(date);
+    resultDate.setHours(0, 0, 0, 0);
+
+    const newResult = new DailyResult({
+      date: resultDate,
+      marketName: marketName.toUpperCase(),
+      open: open.trim(),
+      close: close.trim(),
+      result: result ? result.trim() : ''
+    });
+
+    const savedResult = await newResult.save();
+    res.status(201).json(savedResult);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ error: 'Result for this date and market already exists' });
+    }
+    console.error('Error creating daily result:', error);
+    res.status(500).json({ error: 'Failed to create daily result' });
+  }
+});
+
+// PUT update daily result
+app.put('/api/daily-results/:id', async (req, res) => {
+  try {
+    const { date, marketName, open, close, result } = req.body;
+    const updateData = {};
+    
+    if (date) {
+      const resultDate = new Date(date);
+      resultDate.setHours(0, 0, 0, 0);
+      updateData.date = resultDate;
+    }
+    if (marketName) updateData.marketName = marketName.toUpperCase();
+    if (open) updateData.open = open.trim();
+    if (close) updateData.close = close.trim();
+    if (result !== undefined) updateData.result = result.trim();
+
+    const dailyResult = await DailyResult.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!dailyResult) {
+      return res.status(404).json({ error: 'Daily result not found' });
+    }
+
+    res.json(dailyResult);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ error: 'Result for this date and market already exists' });
+    }
+    console.error('Error updating daily result:', error);
+    res.status(500).json({ error: 'Failed to update daily result' });
+  }
+});
+
+// DELETE daily result
+app.delete('/api/daily-results/:id', async (req, res) => {
+  try {
+    const result = await DailyResult.findByIdAndDelete(req.params.id);
+    
+    if (!result) {
+      return res.status(404).json({ error: 'Daily result not found' });
+    }
+
+    res.json({ message: 'Daily result deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting daily result:', error);
+    res.status(500).json({ error: 'Failed to delete daily result' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✓ Server running on http://localhost:${PORT}`);
   console.log(`✓ API available at http://localhost:${PORT}/api/markets`);
   console.log(`✓ Live Results API available at http://localhost:${PORT}/api/live-results`);
   console.log(`✓ Settings API available at http://localhost:${PORT}/api/settings`);
   console.log(`✓ Chart Data API available at http://localhost:${PORT}/api/chart-data`);
+  console.log(`✓ Daily Results API available at http://localhost:${PORT}/api/daily-results`);
+  console.log(`✓ HTML Chart Data API available at http://localhost:${PORT}/api/html-chart-data`);
   console.log(`✓ Number Data API available at http://localhost:${PORT}/api/number-data`);
 });
