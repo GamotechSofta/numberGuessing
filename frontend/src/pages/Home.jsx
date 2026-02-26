@@ -12,6 +12,7 @@ import {
   PopularMarketsSection,
   PlayingMatkaSection,
 } from '../components/home'
+import { STATIC_LIVE_RESULTS } from '../data/staticData'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
 const API_URL = `${API_BASE_URL}/api/markets`
@@ -20,9 +21,9 @@ const LIVE_RESULTS_URL = `${API_BASE_URL}/api/live-results`
 export default function Home() {
   const [markets, setMarkets] = useState([])
   const [allMarkets, setAllMarkets] = useState([])
-  const [liveResults, setLiveResults] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [resultsLoading, setResultsLoading] = useState(true)
+  const [liveResults, setLiveResults] = useState(STATIC_LIVE_RESULTS)
+  const [loading, setLoading] = useState(false)
+  const [resultsLoading, setResultsLoading] = useState(false)
 
   useEffect(() => {
     fetchMarkets()
@@ -33,12 +34,12 @@ export default function Home() {
     try {
       const response = await fetch(API_URL)
       const data = await response.json()
-      setMarkets(data.slice(0, 5))
-      setAllMarkets(data)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching markets:', error)
-      setLoading(false)
+      if (Array.isArray(data) && data.length > 0) {
+        setMarkets(data.slice(0, 5))
+        setAllMarkets(data)
+      }
+    } catch (_err) {
+      // keep existing state (empty or previous fetch)
     }
   }
 
@@ -46,11 +47,9 @@ export default function Home() {
     try {
       const response = await fetch(LIVE_RESULTS_URL)
       const data = await response.json()
-      setLiveResults(data)
-      setResultsLoading(false)
-    } catch (error) {
-      console.error('Error fetching live results:', error)
-      setResultsLoading(false)
+      if (Array.isArray(data) && data.length > 0) setLiveResults(data)
+    } catch (_err) {
+      // use static data already set
     }
   }
 

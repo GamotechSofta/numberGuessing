@@ -13,11 +13,11 @@ export default function AllMarketsSection({ markets, loading }) {
 
         {/* Market list */}
         {loading ? (
-          <div className="py-8 text-center text-amber-100/80 text-sm">Loading markets...</div>
+          <div className="py-8 text-center text-white text-sm">Loading markets...</div>
         ) : !markets || markets.length === 0 ? (
-          <div className="py-8 text-center text-amber-100/80 text-sm">No markets available</div>
+          <div className="py-8 text-center text-white text-sm">No markets available</div>
         ) : (
-          <div className="divide-y divide-neutral-700">
+          <div className="divide-y divide-neutral-700 min-h-[120px]">
             {markets.map((market) => (
               <div
                 key={market._id || market.id}
@@ -31,15 +31,49 @@ export default function AllMarketsSection({ markets, loading }) {
                 </Link>
 
                 <div className="flex-1 min-w-0 text-center px-2">
-                  <p className="text-neutral-200 uppercase text-sm font-medium tracking-wide mb-1">
-                    {market.name}
+                  {/* 1. MARKET NAME - italic yellow, uppercase */}
+                  <p className="text-amber-400 italic uppercase text-base sm:text-lg font-medium tracking-wide mb-1 block">
+                    {market.name || '—'}
                   </p>
-                  <p className="text-amber-400 text-xl sm:text-2xl font-bold mb-1">
-                    {market.open}-{market.close}
+                  {/* 2. Result - bold bright yellow, largest */}
+                  <p className="text-yellow-400 text-xl sm:text-2xl font-bold mb-1 block min-h-[1.5rem]">
+                    {(() => {
+                      const o = market.open != null ? String(market.open).trim() : ''
+                      const c = market.close != null ? String(market.close).trim() : ''
+                      const isPlaceholder = !o || !c || o === '***' || c === '***'
+                      if (isPlaceholder) return '***_**_***'
+                      if (market.result) return String(market.result)
+                      return `${o}-${c}`
+                    })()}
                   </p>
-                  <p className="text-neutral-300 text-xs">
-                    ({market.timing ?? ' - '})
-                  </p>
+                  {/* 3. Starting Time & Closing Time - two lines, italic yellow */}
+                  <div className="text-amber-400 italic text-xs space-y-0.5 block min-h-[2rem]">
+                    {(() => {
+                      const start = (market.openingTime && String(market.openingTime).trim()) || ''
+                      const end = (market.closingTime && String(market.closingTime).trim()) || ''
+                      if (start || end) {
+                        return (
+                          <>
+                            <p className="block">Starting Time: {start || '—'}</p>
+                            <p className="block">Closing Time: {end || '—'}</p>
+                          </>
+                        )
+                      }
+                      if (market.timing && String(market.timing).trim()) {
+                        const parts = String(market.timing).split(/\s*-\s*/).map((s) => s.trim())
+                        if (parts.length >= 2) {
+                          return (
+                            <>
+                              <p className="block">Starting Time: {parts[0]}</p>
+                              <p className="block">Closing Time: {parts[1]}</p>
+                            </>
+                          )
+                        }
+                        return <p className="block">({market.timing})</p>
+                      }
+                      return <p className="block">(-)</p>
+                    })()}
+                  </div>
                 </div>
 
                 <Link

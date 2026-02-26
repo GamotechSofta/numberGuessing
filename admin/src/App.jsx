@@ -3,7 +3,6 @@ import './App.css'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Markets from './components/Markets'
-import LiveResults from './components/LiveResults'
 import DailyResults from './components/DailyResults'
 import ChartManagement from './components/ChartManagement'
 import Settings from './components/Settings'
@@ -18,8 +17,6 @@ function App() {
         return <Dashboard />
       case 'markets':
         return <Markets />
-      case 'live-results':
-        return <LiveResults />
       case 'daily-results':
         return <DailyResults />
       case 'chart-management':

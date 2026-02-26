@@ -16,7 +16,9 @@ const marketSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  }
+  },
+  openingTime: { type: String, trim: true, default: '' },
+  closingTime: { type: String, trim: true, default: '' }
 }, {
   timestamps: true
 });

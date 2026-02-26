@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
 const API_URL = `${API_BASE_URL}/api/markets`
-const LIVE_RESULTS_URL = `${API_BASE_URL}/api/live-results`
 const DAILY_RESULTS_URL = `${API_BASE_URL}/api/daily-results`
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({ markets: 0, liveResults: 0, dailyResults: 0 })
+  const [stats, setStats] = useState({ markets: 0, dailyResults: 0 })
 
   useEffect(() => {
     fetchStats()
@@ -14,17 +13,14 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const [marketsRes, resultsRes, dailyResultsRes] = await Promise.all([
+      const [marketsRes, dailyResultsRes] = await Promise.all([
         fetch(API_URL),
-        fetch(LIVE_RESULTS_URL),
         fetch(DAILY_RESULTS_URL)
       ])
       const markets = await marketsRes.json()
-      const results = await resultsRes.json()
       const dailyResults = await dailyResultsRes.json()
-      setStats({ 
-        markets: markets.length, 
-        liveResults: results.length,
+      setStats({
+        markets: markets.length,
         dailyResults: dailyResults.length
       })
     } catch (error) {
@@ -53,16 +49,6 @@ export default function Dashboard() {
         <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs sm:text-sm mb-1">Live Results</p>
-              <p className="text-2xl sm:text-3xl font-bold text-green-400">{stats.liveResults}</p>
-            </div>
-            <div className="text-3xl sm:text-4xl">⚡</div>
-          </div>
-        </div>
-
-        <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border-2 border-yellow-600">
-          <div className="flex items-center justify-between">
-            <div>
               <p className="text-gray-400 text-xs sm:text-sm mb-1">Daily Results</p>
               <p className="text-2xl sm:text-3xl font-bold text-blue-400">{stats.dailyResults}</p>
             </div>
@@ -77,10 +63,6 @@ export default function Dashboard() {
           <div className="bg-gray-700 rounded-lg p-3 sm:p-4 border border-yellow-500/30">
             <h4 className="text-white font-semibold mb-2 text-sm sm:text-base">Markets Management</h4>
             <p className="text-gray-400 text-xs sm:text-sm">Add, edit, or delete markets</p>
-          </div>
-          <div className="bg-gray-700 rounded-lg p-3 sm:p-4 border border-yellow-500/30">
-            <h4 className="text-white font-semibold mb-2 text-sm sm:text-base">Live Results</h4>
-            <p className="text-gray-400 text-xs sm:text-sm">Manage live result updates</p>
           </div>
         </div>
       </div>

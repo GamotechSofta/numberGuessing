@@ -140,8 +140,22 @@ async function initializeDefaultChartData() {
 // GET all markets
 app.get('/api/markets', async (req, res) => {
   try {
-    const markets = await Market.find().sort({ createdAt: -1 });
-    res.json(markets);
+    const markets = await Market.find().sort({ createdAt: -1 }).lean();
+    const withTimes = markets.map((m) => {
+      const opening = m.openingTime != null ? String(m.openingTime).trim() : '';
+      const closing = m.closingTime != null ? String(m.closingTime).trim() : '';
+      return {
+        _id: m._id,
+        name: m.name,
+        open: m.open,
+        close: m.close,
+        openingTime: opening,
+        closingTime: closing,
+        createdAt: m.createdAt,
+        updatedAt: m.updatedAt
+      };
+    });
+    res.json(withTimes);
   } catch (error) {
     console.error('Error fetching markets:', error);
     res.status(500).json({ error: 'Failed to fetch markets' });
@@ -165,7 +179,7 @@ app.get('/api/markets/:id', async (req, res) => {
 // POST create new market
 app.post('/api/markets', async (req, res) => {
   try {
-    const { name, open, close } = req.body;
+    const { name, open, close, openingTime, closingTime } = req.body;
     
     if (!name || !open || !close) {
       return res.status(400).json({ error: 'Name, open, and close are required' });
@@ -174,11 +188,18 @@ app.post('/api/markets', async (req, res) => {
     const newMarket = new Market({
       name: name.toUpperCase(),
       open,
-      close
+      close,
+      openingTime: openingTime != null ? String(openingTime).trim() : '',
+      closingTime: closingTime != null ? String(closingTime).trim() : ''
     });
 
     const savedMarket = await newMarket.save();
-    res.status(201).json(savedMarket);
+    const saved = savedMarket.toObject ? savedMarket.toObject() : savedMarket;
+    res.status(201).json({
+      ...saved,
+      openingTime: saved.openingTime != null ? String(saved.openingTime).trim() : '',
+      closingTime: saved.closingTime != null ? String(saved.closingTime).trim() : ''
+    });
   } catch (error) {
     console.error('Error creating market:', error);
     res.status(500).json({ error: 'Failed to create market' });
@@ -188,12 +209,14 @@ app.post('/api/markets', async (req, res) => {
 // PUT update market
 app.put('/api/markets/:id', async (req, res) => {
   try {
-    const { name, open, close } = req.body;
+    const { name, open, close, openingTime, closingTime } = req.body;
     const updateData = {};
     
     if (name) updateData.name = name.toUpperCase();
-    if (open) updateData.open = open;
-    if (close) updateData.close = close;
+    if (open !== undefined) updateData.open = open;
+    if (close !== undefined) updateData.close = close;
+    if (openingTime !== undefined) updateData.openingTime = String(openingTime).trim();
+    if (closingTime !== undefined) updateData.closingTime = String(closingTime).trim();
 
     const market = await Market.findByIdAndUpdate(
       req.params.id,
