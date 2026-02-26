@@ -149,10 +149,10 @@ export default function Charts() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mb-4"></div>
-          <div className="text-gray-400 font-bold text-xl">Loading chart data...</div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gold-600 mb-4"></div>
+          <div className="text-gold-400 font-bold text-xl">Loading chart data...</div>
         </div>
       </div>
     )
@@ -160,13 +160,13 @@ export default function Charts() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-400 text-2xl mb-4">⚠️</div>
           <div className="text-red-400 font-bold text-xl mb-2">{error}</div>
           <button
             onClick={fetchChartData}
-            className="px-6 py-2 bg-yellow-600 text-black font-semibold rounded hover:bg-yellow-500 transition-colors"
+            className="px-6 py-2 bg-gold-600 text-black font-semibold rounded hover:bg-gold-500 transition-colors"
           >
             Retry
           </button>
@@ -176,20 +176,20 @@ export default function Charts() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white w-full">
+    <div className="min-h-screen bg-black text-white w-full">
       <div className="w-full py-6 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-yellow-400 mb-2 text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gold-400 mb-2 text-center">
             Market Analysis Charts
           </h1>
-          <p className="text-gray-400 text-sm text-center mb-6">KALYAN Market</p>
+          <p className="text-neutral-400 text-sm text-center mb-6">KALYAN Market</p>
 
           {charts.length === 0 ? (
             <div className="text-center py-12">
-              <div className="bg-gray-800 rounded-lg p-8 border-2 border-yellow-600">
-                <div className="text-yellow-400 text-2xl mb-4">📊</div>
+              <div className="bg-black rounded-lg p-8 border-2 border-gold-600">
+                <div className="text-gold-400 text-2xl mb-4">📊</div>
                 <h2 className="text-xl font-semibold text-white mb-2">No Chart Data Available</h2>
-                <p className="text-gray-400 text-sm">
+                <p className="text-neutral-400 text-sm">
                   Chart data will appear here once it's added from admin panel.
                 </p>
               </div>
@@ -199,22 +199,22 @@ export default function Charts() {
               <div className="overflow-x-auto mb-6">
                 <table className="w-full border-collapse bg-white min-w-[600px] max-w-[800px] mx-auto shadow-lg">
                   <thead>
-                    <tr className="bg-yellow-600">
-                      <th className="border border-gray-400 px-2 py-2 text-black font-bold text-sm w-32">Date</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Mon</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Tue</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Wed</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Thu</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Fri</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Sat</th>
-                    <th className="border border-gray-400 px-1 py-2 text-black font-bold text-sm w-24">Sun</th>
+                    <tr className="bg-gold-600">
+                      <th className="border border-gold-700 px-2 py-2 text-black font-bold text-sm w-32">Date</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Mon</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Tue</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Wed</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Thu</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Fri</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Sat</th>
+                    <th className="border border-gold-700 px-1 py-2 text-black font-bold text-sm w-24">Sun</th>
                     </tr>
                   </thead>
                   <tbody>
                     {charts.map((chart, index) => (
                       <tr key={`chart-${index}`}>
                         {/* Date Column */}
-                        <td className="border border-gray-400 bg-white px-2 py-2 text-black font-semibold text-[10px] text-center align-middle whitespace-pre-line leading-tight w-32">
+                        <td className="border border-gold-700 bg-white px-2 py-2 text-black font-semibold text-[10px] text-center align-middle whitespace-pre-line leading-tight w-32">
                           {formatWeekDate(chart.week).replace(' to ', '\nto\n')}
                         </td>
                         {renderDayCell(chart.Mon)}
@@ -230,9 +230,9 @@ export default function Charts() {
                 </table>
               </div>
 
-              <div className="mt-6 p-4 border border-yellow-600 bg-gray-800 rounded-lg">
-                <h2 className="text-lg font-semibold text-yellow-400 mb-2">Chart Guide</h2>
-                <ul className="list-disc pl-5 text-sm text-gray-300 space-y-1">
+              <div className="mt-6 p-4 border border-gold-600 bg-black rounded-lg">
+                <h2 className="text-lg font-semibold text-gold-400 mb-2">Chart Guide</h2>
+                <ul className="list-disc pl-5 text-sm text-neutral-300 space-y-1">
                   <li><strong>O:</strong> Opening number</li>
                   <li><strong>Center Number:</strong> Result number</li>
                   <li><strong>C:</strong> Closing number</li>

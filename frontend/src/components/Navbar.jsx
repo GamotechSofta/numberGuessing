@@ -34,25 +34,39 @@ export default function Navbar() {
           padding-right: 30px;
         }
       `}</style>
-      <nav className="bg-yellow-500 text-black shadow-md sticky top-0 z-50 w-full">
+      <nav className="bg-black text-gold-400 shadow-md sticky top-0 z-50 w-full border-b-2 border-gold-500">
         <div className="w-full">
+        {/* Top bar: Logo + Contact */}
+        <div className="hidden sm:flex items-center justify-between py-2 px-4 border-b border-gold-600/60">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-full bg-gold-500 flex items-center justify-center text-black font-bold text-lg">P</span>
+            <span className="text-gold-400 font-semibold text-sm">DPBossOnline.com</span>
+          </Link>
+          <a href="tel:+918625073928" className="text-gold-400 font-semibold text-sm hover:text-gold-300">+91 8625073928</a>
+        </div>
         {/* Top Navigation Bar - Desktop Only */}
-        <div className="hidden sm:flex items-center justify-center gap-2 md:gap-3 text-xs sm:text-sm font-semibold py-2 px-4 border-b border-yellow-600">
-          <Link to="/" className="hover:text-yellow-900 transition-colors whitespace-nowrap">Dpboss</Link>
-          <span className="text-yellow-800 hidden md:inline">|</span>
-          <Link to="/" className="hover:text-yellow-900 transition-colors whitespace-nowrap">Satta Matka</Link>
-          <span className="text-yellow-800 hidden lg:inline">|</span>
-          <Link to="/" className="hover:text-yellow-900 transition-colors whitespace-nowrap hidden lg:inline">Kalyan Matka</Link>
-          <span className="text-yellow-800 hidden lg:inline">|</span>
-          <Link to="/results" className="hover:text-yellow-900 transition-colors whitespace-nowrap hidden md:inline">Online Matka Result</Link>
+        <div className="hidden sm:flex items-center justify-center gap-2 md:gap-3 text-xs sm:text-sm font-semibold py-2 px-4 border-b border-gold-600/50">
+          <span className="text-gold-400">✦</span>
+          <Link to="/" className="hover:text-gold-300 transition-colors whitespace-nowrap">DpBoss King</Link>
+          <span className="text-gold-600 hidden md:inline">|</span>
+          <Link to="/" className="hover:text-gold-300 transition-colors whitespace-nowrap">Satta Matka</Link>
+          <span className="text-gold-600 hidden lg:inline">|</span>
+          <Link to="/" className="hover:text-gold-300 transition-colors whitespace-nowrap hidden lg:inline">Kalyan Matka</Link>
+          <span className="text-gold-600 hidden lg:inline">|</span>
+          <Link to="/results" className="hover:text-gold-300 transition-colors whitespace-nowrap hidden md:inline">Online Matka Result</Link>
+          <span className="text-gold-400">✦</span>
         </div>
         
         {/* Bottom Navigation Menu */}
         <div className="flex items-center px-4">
-          {/* Mobile Menu Button */}
+          {/* Mobile: Logo + golden text */}
+          <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
+            <span className="w-7 h-7 rounded-full bg-gold-500 flex items-center justify-center text-black font-bold text-sm">P</span>
+            <span className="text-gold-400 font-semibold text-xs">DpBoss King</span>
+          </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="sm:hidden p-2 text-black hover:bg-yellow-400 rounded transition-colors flex-shrink-0 z-10"
+            className="sm:hidden p-2 text-gold-400 hover:bg-gold-600/20 rounded transition-colors flex-shrink-0 z-10 ml-auto"
             aria-label="Toggle menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +81,7 @@ export default function Navbar() {
           {/* Scrolling Text - Mobile Only */}
           <div className="sm:hidden flex-1 overflow-hidden ml-2 mr-2 relative">
             <div className="scrolling-text-container">
-              <div className="scrolling-text text-xs font-semibold text-black">
+              <div className="scrolling-text text-xs font-semibold text-gold-400">
                 <span>India's no.1 betting prediction site • </span>
                 <span>India's no.1 betting prediction site • </span>
                 <span>India's no.1 betting prediction site • </span>
@@ -84,8 +98,8 @@ export default function Navbar() {
               to="/" 
               className={`px-3 py-1.5 rounded transition-colors ${
                 isActive('/') 
-                  ? 'bg-yellow-600 text-black font-semibold' 
-                  : 'hover:bg-yellow-400'
+                  ? 'bg-gold-600 text-black font-semibold' 
+                  : 'hover:bg-gold-600/20 text-gold-400'
               }`}
             >
               Home
@@ -94,8 +108,8 @@ export default function Navbar() {
               to="/results" 
               className={`px-3 py-1.5 rounded transition-colors ${
                 isActive('/results') 
-                  ? 'bg-yellow-600 text-black font-semibold' 
-                  : 'hover:bg-yellow-400'
+                  ? 'bg-gold-600 text-black font-semibold' 
+                  : 'hover:bg-gold-600/20 text-gold-400'
               }`}
             >
               Results
@@ -104,8 +118,8 @@ export default function Navbar() {
               to="/tips" 
               className={`px-3 py-1.5 rounded transition-colors ${
                 isActive('/tips') 
-                  ? 'bg-yellow-600 text-black font-semibold' 
-                  : 'hover:bg-yellow-400'
+                  ? 'bg-gold-600 text-black font-semibold' 
+                  : 'hover:bg-gold-600/20 text-gold-400'
               }`}
             >
               Tips
@@ -114,8 +128,8 @@ export default function Navbar() {
               to="/charts" 
               className={`px-3 py-1.5 rounded transition-colors ${
                 isActive('/charts') 
-                  ? 'bg-yellow-600 text-black font-semibold' 
-                  : 'hover:bg-yellow-400'
+                  ? 'bg-gold-600 text-black font-semibold' 
+                  : 'hover:bg-gold-600/20 text-gold-400'
               }`}
             >
               Charts
@@ -124,8 +138,8 @@ export default function Navbar() {
               to="/about" 
               className={`px-3 py-1.5 rounded transition-colors ${
                 isActive('/about') 
-                  ? 'bg-yellow-600 text-black font-semibold' 
-                  : 'hover:bg-yellow-400'
+                  ? 'bg-gold-600 text-black font-semibold' 
+                  : 'hover:bg-gold-600/20 text-gold-400'
               }`}
             >
               About
@@ -135,15 +149,15 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="sm:hidden border-t border-yellow-600 bg-yellow-500">
+          <div className="sm:hidden border-t border-gold-600/50 bg-black">
             <div className="flex flex-col">
               <Link 
                 to="/" 
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 text-sm font-medium transition-colors ${
                   isActive('/') 
-                    ? 'bg-yellow-600 text-black font-semibold' 
-                    : 'hover:bg-yellow-400'
+                    ? 'bg-gold-600 text-black font-semibold' 
+                    : 'hover:bg-gold-600/20 text-gold-400'
                 }`}
               >
                 Home
@@ -153,8 +167,8 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 text-sm font-medium transition-colors ${
                   isActive('/results') 
-                    ? 'bg-yellow-600 text-black font-semibold' 
-                    : 'hover:bg-yellow-400'
+                    ? 'bg-gold-600 text-black font-semibold' 
+                    : 'hover:bg-gold-600/20 text-gold-400'
                 }`}
               >
                 Results
@@ -164,8 +178,8 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 text-sm font-medium transition-colors ${
                   isActive('/tips') 
-                    ? 'bg-yellow-600 text-black font-semibold' 
-                    : 'hover:bg-yellow-400'
+                    ? 'bg-gold-600 text-black font-semibold' 
+                    : 'hover:bg-gold-600/20 text-gold-400'
                 }`}
               >
                 Tips
@@ -175,8 +189,8 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 text-sm font-medium transition-colors ${
                   isActive('/charts') 
-                    ? 'bg-yellow-600 text-black font-semibold' 
-                    : 'hover:bg-yellow-400'
+                    ? 'bg-gold-600 text-black font-semibold' 
+                    : 'hover:bg-gold-600/20 text-gold-400'
                 }`}
               >
                 Charts
@@ -186,8 +200,8 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 text-sm font-medium transition-colors ${
                   isActive('/about') 
-                    ? 'bg-yellow-600 text-black font-semibold' 
-                    : 'hover:bg-yellow-400'
+                    ? 'bg-gold-600 text-black font-semibold' 
+                    : 'hover:bg-gold-600/20 text-gold-400'
                 }`}
               >
                 About

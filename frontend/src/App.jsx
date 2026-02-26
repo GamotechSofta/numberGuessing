@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Navbar from './components/Navbar'
+import WhatsAppButton from './components/WhatsAppButton'
 import Home from './pages/Home'
 import Results from './pages/Results'
 import Tips from './pages/Tips'
@@ -10,8 +10,7 @@ import './App.css'
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-900 w-full m-0 p-0">
-        <Navbar />
+      <div className="min-h-screen bg-black text-white w-full m-0 p-0">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/results" element={<Results />} />
@@ -19,6 +18,7 @@ function App() {
           <Route path="/charts" element={<Charts />} />
           <Route path="/about" element={<About />} />
         </Routes>
+        <WhatsAppButton />
       </div>
     </Router>
   )

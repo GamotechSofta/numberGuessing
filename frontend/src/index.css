@@ -1,2 +1,19 @@
 @import "tailwindcss";
 
+/* Tailwind v4: Golden theme colors */
+@theme {
+  --color-gold-300: #E5C76B;
+  --color-gold-400: #D4AF37;
+  --color-gold-500: #C5A028;
+  --color-gold-600: #B8860B;
+  --color-gold-700: #9A7B0A;
+}
+
+/* Black & Golden theme */
+:root {
+  --color-bg: #000000;
+  --color-surface: #0a0a0a;
+  --color-border: #B8860B;
+  --color-gold: #D4AF37;
+  --color-gold-dark: #9A7B0A;
+}
