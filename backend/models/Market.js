@@ -18,7 +18,9 @@ const marketSchema = new mongoose.Schema({
     trim: true
   },
   openingTime: { type: String, trim: true, default: '' },
-  closingTime: { type: String, trim: true, default: '' }
+  closingTime: { type: String, trim: true, default: '' },
+  goldenAnk: { type: String, trim: true, default: '' },
+  motorPatti: { type: String, trim: true, default: '' }
 }, {
   timestamps: true
 });

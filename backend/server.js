@@ -151,6 +151,8 @@ app.get('/api/markets', async (req, res) => {
         close: m.close,
         openingTime: opening,
         closingTime: closing,
+        goldenAnk: m.goldenAnk != null ? String(m.goldenAnk).trim() : '',
+        motorPatti: m.motorPatti != null ? String(m.motorPatti).trim() : '',
         createdAt: m.createdAt,
         updatedAt: m.updatedAt
       };
@@ -179,7 +181,7 @@ app.get('/api/markets/:id', async (req, res) => {
 // POST create new market
 app.post('/api/markets', async (req, res) => {
   try {
-    const { name, open, close, openingTime, closingTime } = req.body;
+    const { name, open, close, openingTime, closingTime, goldenAnk, motorPatti } = req.body;
     
     if (!name || !open || !close) {
       return res.status(400).json({ error: 'Name, open, and close are required' });
@@ -190,7 +192,9 @@ app.post('/api/markets', async (req, res) => {
       open,
       close,
       openingTime: openingTime != null ? String(openingTime).trim() : '',
-      closingTime: closingTime != null ? String(closingTime).trim() : ''
+      closingTime: closingTime != null ? String(closingTime).trim() : '',
+      goldenAnk: goldenAnk != null ? String(goldenAnk).trim() : '',
+      motorPatti: motorPatti != null ? String(motorPatti).trim() : ''
     });
 
     const savedMarket = await newMarket.save();
@@ -198,7 +202,9 @@ app.post('/api/markets', async (req, res) => {
     res.status(201).json({
       ...saved,
       openingTime: saved.openingTime != null ? String(saved.openingTime).trim() : '',
-      closingTime: saved.closingTime != null ? String(saved.closingTime).trim() : ''
+      closingTime: saved.closingTime != null ? String(saved.closingTime).trim() : '',
+      goldenAnk: saved.goldenAnk != null ? String(saved.goldenAnk).trim() : '',
+      motorPatti: saved.motorPatti != null ? String(saved.motorPatti).trim() : ''
     });
   } catch (error) {
     console.error('Error creating market:', error);
@@ -209,7 +215,7 @@ app.post('/api/markets', async (req, res) => {
 // PUT update market
 app.put('/api/markets/:id', async (req, res) => {
   try {
-    const { name, open, close, openingTime, closingTime } = req.body;
+    const { name, open, close, openingTime, closingTime, goldenAnk, motorPatti } = req.body;
     const updateData = {};
     
     if (name) updateData.name = name.toUpperCase();
@@ -217,6 +223,8 @@ app.put('/api/markets/:id', async (req, res) => {
     if (close !== undefined) updateData.close = close;
     if (openingTime !== undefined) updateData.openingTime = String(openingTime).trim();
     if (closingTime !== undefined) updateData.closingTime = String(closingTime).trim();
+    if (goldenAnk !== undefined) updateData.goldenAnk = String(goldenAnk).trim();
+    if (motorPatti !== undefined) updateData.motorPatti = String(motorPatti).trim();
 
     const market = await Market.findByIdAndUpdate(
       req.params.id,
@@ -342,6 +350,65 @@ app.delete('/api/live-results/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting live result:', error);
     res.status(500).json({ error: 'Failed to delete live result' });
+  }
+});
+
+// ========== LUCKY NUMBER API (single site-wide) ==========
+const LUCKY_GOLDEN_ANK_KEY = 'LUCKY_GOLDEN_ANK'
+const LUCKY_MOTOR_PATTI_KEY = 'LUCKY_MOTOR_PATTI'
+
+app.get('/api/lucky-number', async (req, res) => {
+  try {
+    const [goldenAnkSetting, motorPattiSetting] = await Promise.all([
+      Setting.findOne({ key: LUCKY_GOLDEN_ANK_KEY }).lean(),
+      Setting.findOne({ key: LUCKY_MOTOR_PATTI_KEY }).lean()
+    ]);
+    const toVal = (s) => {
+      const v = (s && String(s).trim()) || '';
+      return v === '-' ? '' : v;
+    };
+    res.json({
+      goldenAnk: toVal(goldenAnkSetting?.value),
+      motorPatti: toVal(motorPattiSetting?.value)
+    });
+  } catch (error) {
+    console.error('Error fetching lucky number:', error);
+    res.status(500).json({ error: 'Failed to fetch lucky number' });
+  }
+});
+
+app.put('/api/lucky-number', async (req, res) => {
+  try {
+    const { goldenAnk, motorPatti } = req.body;
+    const gaVal = (goldenAnk != null ? String(goldenAnk).trim() : '') || '-';
+    const mpVal = (motorPatti != null ? String(motorPatti).trim() : '') || '-';
+    await Promise.all([
+      Setting.findOneAndUpdate(
+        { key: LUCKY_GOLDEN_ANK_KEY },
+        { $set: { value: gaVal, description: 'Today Lucky Number - Golden Ank' } },
+        { upsert: true, new: true, runValidators: true }
+      ),
+      Setting.findOneAndUpdate(
+        { key: LUCKY_MOTOR_PATTI_KEY },
+        { $set: { value: mpVal, description: 'Today Lucky Number - Motor Patti' } },
+        { upsert: true, new: true, runValidators: true }
+      )
+    ]);
+    const [goldenAnkSetting, motorPattiSetting] = await Promise.all([
+      Setting.findOne({ key: LUCKY_GOLDEN_ANK_KEY }).lean(),
+      Setting.findOne({ key: LUCKY_MOTOR_PATTI_KEY }).lean()
+    ]);
+    const toVal = (s) => {
+      const v = (s && String(s).trim()) || '';
+      return v === '-' ? '' : v;
+    };
+    res.json({
+      goldenAnk: toVal(goldenAnkSetting?.value),
+      motorPatti: toVal(motorPattiSetting?.value)
+    });
+  } catch (error) {
+    console.error('Error updating lucky number:', error);
+    res.status(500).json({ error: 'Failed to update lucky number' });
   }
 });
 

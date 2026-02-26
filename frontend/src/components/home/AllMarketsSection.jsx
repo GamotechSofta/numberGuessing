@@ -1,7 +1,33 @@
 import { Link } from 'react-router-dom'
 import { getMarketResultDisplay } from '../../utils/marketResult'
 
+/** Parse "10:30 AM" / "11:45 PM" to minutes since midnight for sorting. */
+function parseTimeToMinutes(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return null
+  const m = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!m) return null
+  let hour = parseInt(m[1], 10)
+  const min = parseInt(m[2], 10)
+  if (m[3].toUpperCase() === 'PM') hour = hour === 12 ? 12 : hour + 12
+  else hour = hour === 12 ? 0 : hour
+  return hour * 60 + min
+}
+
+/** Sort markets by opening time (earlier first); invalid/missing time last. */
+function sortMarketsByTime(markets) {
+  if (!markets || !Array.isArray(markets)) return []
+  return [...markets].sort((a, b) => {
+    const openA = parseTimeToMinutes(a.openingTime)
+    const openB = parseTimeToMinutes(b.openingTime)
+    if (openA == null && openB == null) return 0
+    if (openA == null) return 1
+    if (openB == null) return -1
+    return openA - openB
+  })
+}
+
 export default function AllMarketsSection({ markets, loading }) {
+  const sortedMarkets = sortMarketsByTime(markets)
   return (
     <section className="w-full py-6 px-3 sm:px-4 md:px-6 bg-black border-t border-b border-amber-700/80">
       <div className="w-full mx-auto border-2 border-gold-500 overflow-hidden bg-black rounded-none">
@@ -19,7 +45,7 @@ export default function AllMarketsSection({ markets, loading }) {
           <div className="py-8 text-center text-white text-sm">No markets available</div>
         ) : (
           <div className="divide-y divide-neutral-700 min-h-[120px]">
-            {markets.map((market) => (
+            {sortedMarkets.map((market) => (
               <div
                 key={market._id || market.id}
                 className="flex items-center justify-between gap-4 py-5 px-4 w-full"

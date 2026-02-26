@@ -1,4 +1,7 @@
-export default function LuckyNumberSection() {
+export default function LuckyNumberSection({ goldenAnk = '', motorPatti = '' }) {
+  const ga = (goldenAnk && String(goldenAnk).trim()) || '—'
+  const mp = (motorPatti && String(motorPatti).trim()) || '—'
+
   return (
     <section className="w-full py-6 px-3 sm:px-4 md:px-6 bg-black">
       <div className="w-full overflow-hidden bg-black border-2 border-gold-500 rounded-none">
@@ -12,11 +15,11 @@ export default function LuckyNumberSection() {
         <div className="grid grid-cols-2 divide-x divide-white/30">
           <div className="bg-black py-4 px-0 text-center">
             <h3 className="text-white text-sm font-medium mb-2">Golden Ank</h3>
-            <p className="text-green-400 text-xl sm:text-2xl font-bold">1-4-6-9</p>
+            <p className="text-green-400 text-xl sm:text-2xl font-bold">{ga}</p>
           </div>
           <div className="bg-black py-4 px-0 text-center">
             <h3 className="text-white text-sm font-medium mb-2">Motor Patti</h3>
-            <p className="text-green-400 text-xl sm:text-2xl font-bold">12469</p>
+            <p className="text-green-400 text-xl sm:text-2xl font-bold">{mp}</p>
           </div>
         </div>
       </div>

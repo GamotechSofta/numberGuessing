@@ -3,6 +3,7 @@ import './App.css'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Markets from './components/Markets'
+import LuckyNumber from './components/LuckyNumber'
 import DailyResults from './components/DailyResults'
 import ChartManagement from './components/ChartManagement'
 import Settings from './components/Settings'
@@ -17,6 +18,8 @@ function App() {
         return <Dashboard />
       case 'markets':
         return <Markets />
+      case 'lucky-number':
+        return <LuckyNumber />
       case 'daily-results':
         return <DailyResults />
       case 'chart-management':

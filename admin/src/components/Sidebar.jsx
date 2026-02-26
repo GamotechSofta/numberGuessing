@@ -2,6 +2,7 @@ export default function Sidebar({ activeSection, setActiveSection, sidebarOpen, 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'markets', label: 'Markets', icon: '📈' },
+    { id: 'lucky-number', label: 'Lucky Number', icon: '🍀' },
     { id: 'daily-results', label: 'Daily Results', icon: '📅' },
     { id: 'chart-management', label: 'Chart Management', icon: '📉' },
     { id: 'settings', label: 'Settings', icon: '⚙️' }

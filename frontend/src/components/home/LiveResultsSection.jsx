@@ -17,8 +17,8 @@ function parseTimeToMinutes(timeStr) {
 }
 
 /**
- * True if current system time is between market openingTime and closingTime (inclusive).
- * Uses market.openingTime and market.closingTime; no data structure change.
+ * True if current system time is between market openingTime and closingTime + 10 min (inclusive).
+ * Grace period: market remains visible for 10 minutes after closeTime.
  */
 function isCurrentlyActive(market) {
   const openStr = market.openingTime != null ? String(market.openingTime).trim() : ''
@@ -28,8 +28,9 @@ function isCurrentlyActive(market) {
   if (openMin == null || closeMin == null) return true
   const now = new Date()
   const currentMin = now.getHours() * 60 + now.getMinutes()
-  if (closeMin >= openMin) return currentMin >= openMin && currentMin <= closeMin
-  return currentMin >= openMin || currentMin <= closeMin
+  const closeMinWithGrace = (closeMin + 10) % 1440
+  if (closeMinWithGrace >= openMin) return currentMin >= openMin && currentMin <= closeMinWithGrace
+  return currentMin >= openMin || currentMin <= closeMinWithGrace
 }
 
 export default function LiveResultsSection({ markets, loading }) {
@@ -39,14 +40,23 @@ export default function LiveResultsSection({ markets, loading }) {
 
   return (
     <section className="w-full py-6 px-3 sm:px-4 md:px-6 bg-black">
+      <style>{`
+        @keyframes live-result-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        .live-result-blink {
+          animation: live-result-blink 1.2s ease-in-out infinite;
+        }
+      `}</style>
       <div className="w-full mx-auto overflow-hidden bg-black rounded-none border-2 border-gold-500">
-        {/* Header: same bg and border as Today Lucky Number */}
+        {/* Header: same bg and border as Today Lucky Number - blink animation */}
         <div className="bg-gradient-to-b from-gold-600 via-gold-400 to-gold-600 border-b border-gold-500 py-3 px-4 flex items-center justify-center gap-2">
-          <span className="text-white font-bold text-lg" aria-hidden="true">♠</span>
-          <h2 className="text-white text-base sm:text-lg font-bold uppercase tracking-wide">
+          <span className="text-white font-bold text-lg live-result-blink" aria-hidden="true">♠</span>
+          <h2 className="text-white text-base sm:text-lg font-bold uppercase tracking-wide live-result-blink">
             Satta Matka Live Result
           </h2>
-          <span className="text-white font-bold text-lg" aria-hidden="true">♠</span>
+          <span className="text-white font-bold text-lg live-result-blink" aria-hidden="true">♠</span>
         </div>
 
         {/* Content - filter applied before render */}
