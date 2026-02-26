@@ -1,40 +1,80 @@
-export default function LiveResultsSection({ liveResults, loading }) {
+import { getMarketResultDisplay } from '../../utils/marketResult'
+
+/**
+ * Parse "10:30 AM" / "11:45 PM" to minutes since midnight for comparison.
+ * @param {string} timeStr - e.g. "10:30 AM"
+ * @returns {number|null} - minutes since midnight (0-1439) or null if invalid
+ */
+function parseTimeToMinutes(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return null
+  const m = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!m) return null
+  let hour = parseInt(m[1], 10)
+  const min = parseInt(m[2], 10)
+  if (m[3].toUpperCase() === 'PM') hour = hour === 12 ? 12 : hour + 12
+  else hour = hour === 12 ? 0 : hour
+  return hour * 60 + min
+}
+
+/**
+ * True if current system time is between market openingTime and closingTime (inclusive).
+ * Uses market.openingTime and market.closingTime; no data structure change.
+ */
+function isCurrentlyActive(market) {
+  const openStr = market.openingTime != null ? String(market.openingTime).trim() : ''
+  const closeStr = market.closingTime != null ? String(market.closingTime).trim() : ''
+  const openMin = parseTimeToMinutes(openStr)
+  const closeMin = parseTimeToMinutes(closeStr)
+  if (openMin == null || closeMin == null) return true
+  const now = new Date()
+  const currentMin = now.getHours() * 60 + now.getMinutes()
+  if (closeMin >= openMin) return currentMin >= openMin && currentMin <= closeMin
+  return currentMin >= openMin || currentMin <= closeMin
+}
+
+export default function LiveResultsSection({ markets, loading }) {
+  const list = markets || []
+  const activeList = list.filter(isCurrentlyActive)
+  const displayList = activeList.length > 0 ? activeList : list
+
   return (
     <section className="w-full py-6 px-3 sm:px-4 md:px-6 bg-black">
-      <div className="w-full mx-auto border-2 border-gold-500 overflow-hidden bg-black rounded-none">
-        {/* Golden header bar */}
-        <div className="bg-gold-500 py-3 px-4 flex items-center justify-center gap-2">
-          <span className="text-white text-lg" aria-hidden="true">♠</span>
+      <div className="w-full mx-auto overflow-hidden bg-black rounded-none border-2 border-gold-500">
+        {/* Header: same bg and border as Today Lucky Number */}
+        <div className="bg-gradient-to-b from-gold-600 via-gold-400 to-gold-600 border-b border-gold-500 py-3 px-4 flex items-center justify-center gap-2">
+          <span className="text-white font-bold text-lg" aria-hidden="true">♠</span>
           <h2 className="text-white text-base sm:text-lg font-bold uppercase tracking-wide">
             Satta Matka Live Result
           </h2>
-          <span className="text-white text-lg" aria-hidden="true">♠</span>
+          <span className="text-white font-bold text-lg" aria-hidden="true">♠</span>
         </div>
 
-        {/* Content */}
+        {/* Content - filter applied before render */}
         <div className="py-2">
           {loading ? (
             <div className="py-6 text-center">
               <p className="text-white/80 text-sm">Loading...</p>
             </div>
-          ) : liveResults.length === 0 ? (
+          ) : displayList.length === 0 ? (
             <div className="py-6 text-center">
               <p className="text-white/80 text-sm">No live results available</p>
             </div>
           ) : (
             <div className="divide-y divide-white/40">
-              {liveResults.map((result, index) => (
-                <div key={result._id || result.id || index} className="py-4 px-4 text-center">
-                  <h3 className="text-amber-400 font-bold uppercase text-sm mb-1">
-                    {result.name}
+              {displayList.map((market, index) => (
+                <div key={market._id || market.id || index} className="py-4 px-4 flex flex-col items-center justify-center text-center">
+                  <h3 className="text-amber-400 font-bold uppercase text-base sm:text-lg mb-1 w-full">
+                    {market.name || '—'}
                   </h3>
-                  <p className="text-green-400 text-lg sm:text-xl font-bold mb-1 inline-flex items-center justify-center gap-1">
+                  <p className="text-green-400 text-xl sm:text-2xl font-bold mb-1 w-full flex items-center justify-center gap-1">
                     <span className="text-green-400" aria-hidden="true">▲</span>
-                    {result.result}
+                    {getMarketResultDisplay(market)}
                   </p>
-                  <p className="text-white text-xs sm:text-sm">
-                    {result.timeRange ? `( ${result.timeRange} )` : ''}
-                  </p>
+                  {((market.openingTime && String(market.openingTime).trim()) || (market.closingTime && String(market.closingTime).trim())) && (
+                    <p className="text-gray-400 text-xs sm:text-sm w-full text-center">
+                      ( {[market.openingTime, market.closingTime].filter(Boolean).join(' - ')} )
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

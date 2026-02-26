@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getMarketResultDisplay } from '../utils/marketResult'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
 const API_URL = `${API_BASE_URL}/api/markets`
@@ -200,8 +201,7 @@ export default function Markets() {
           close: addResultMarket.close && addResultMarket.close !== '***' ? addResultMarket.close : '***'
         })
       })
-      setDeclaredOpenValue(value)
-      setAddResultStep('close')
+      closeAddResultModal()
       setOpenPatti('')
       fetchMarkets()
     } catch (err) {
@@ -346,7 +346,7 @@ export default function Markets() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:outline-none"
                   placeholder="e.g., Rudraksh Morning"
                   required
@@ -550,7 +550,7 @@ export default function Markets() {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:outline-none"
               required
               placeholder="e.g., Milan Morning"
@@ -680,16 +680,14 @@ export default function Markets() {
           <p className="text-gray-400 text-center py-12">No markets found. Add your first market above.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {markets.map((market) => {
-              const noResult = !market.open || !market.close || String(market.open).trim() === '***' || String(market.close).trim() === '***'
-              return (
+            {markets.map((market) => (
               <div
                 key={market._id}
                 className="bg-slate-700/80 rounded-xl p-4 sm:p-5 border border-slate-600 relative"
               >
-                {/* Result stars - right corner (orange/gold) */}
+                {/* Result - pana format: openPana_openAnkCloseAnk_closePana */}
                 <p className="absolute top-3 right-3 font-mono text-amber-400 text-sm sm:text-base">
-                  {noResult ? '***_**_***' : `${market.open}_${market.close}`}
+                  {getMarketResultDisplay(market)}
                 </p>
 
                 {/* Status pill */}
@@ -733,8 +731,7 @@ export default function Markets() {
                   </button>
                 </div>
               </div>
-              )
-            })}
+            ))}
           </div>
         )}
       </div>

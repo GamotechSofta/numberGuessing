@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { getMarketResultDisplay } from '../../utils/marketResult'
 
 export default function AllMarketsSection({ markets, loading }) {
   return (
@@ -35,16 +36,9 @@ export default function AllMarketsSection({ markets, loading }) {
                   <p className="text-amber-400 italic uppercase text-base sm:text-lg font-medium tracking-wide mb-1 block">
                     {market.name || '—'}
                   </p>
-                  {/* 2. Result - bold bright yellow, largest */}
+                  {/* 2. Result - bold bright yellow, largest (pana format: openPana_openAnkCloseAnk_closePana) */}
                   <p className="text-yellow-400 text-xl sm:text-2xl font-bold mb-1 block min-h-[1.5rem]">
-                    {(() => {
-                      const o = market.open != null ? String(market.open).trim() : ''
-                      const c = market.close != null ? String(market.close).trim() : ''
-                      const isPlaceholder = !o || !c || o === '***' || c === '***'
-                      if (isPlaceholder) return '***_**_***'
-                      if (market.result) return String(market.result)
-                      return `${o}-${c}`
-                    })()}
+                    {getMarketResultDisplay(market)}
                   </p>
                   {/* 3. Starting Time & Closing Time - two lines, italic yellow */}
                   <div className="text-amber-400 italic text-xs space-y-0.5 block min-h-[2rem]">
