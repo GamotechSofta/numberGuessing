@@ -40,14 +40,14 @@ export default function Navbar() {
         <div className="hidden sm:flex items-center justify-between py-2 px-4 border-b border-gold-600/60">
           <Link to="/" className="flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-gold-500 flex items-center justify-center text-black font-bold text-lg">P</span>
-            <span className="text-gold-400 font-semibold text-sm">DPBossOnline.com</span>
+            <span className="text-gold-400 font-semibold text-sm">dpbossking.com</span>
           </Link>
           <a href="tel:+918625073928" className="text-gold-400 font-semibold text-sm hover:text-gold-300">+91 8625073928</a>
         </div>
         {/* Top Navigation Bar - Desktop Only */}
         <div className="hidden sm:flex items-center justify-center gap-2 md:gap-3 text-xs sm:text-sm font-semibold py-2 px-4 border-b border-gold-600/50">
           <span className="text-gold-400">✦</span>
-          <Link to="/" className="hover:text-gold-300 transition-colors whitespace-nowrap">DpBoss King</Link>
+          <Link to="/" className="hover:text-gold-300 transition-colors whitespace-nowrap">Dpbossking</Link>
           <span className="text-gold-600 hidden md:inline">|</span>
           <Link to="/" className="hover:text-gold-300 transition-colors whitespace-nowrap">Satta Matka</Link>
           <span className="text-gold-600 hidden lg:inline">|</span>
@@ -62,7 +62,7 @@ export default function Navbar() {
           {/* Mobile: Logo + golden text */}
           <div className="sm:hidden flex items-center gap-2 flex-shrink-0">
             <span className="w-7 h-7 rounded-full bg-gold-500 flex items-center justify-center text-black font-bold text-sm">P</span>
-            <span className="text-gold-400 font-semibold text-xs">DpBoss King</span>
+            <span className="text-gold-400 font-semibold text-xs">Dpbossking</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

@@ -23,7 +23,7 @@ export default function HeroSection() {
         <div className="text-center mb-2">
           <img
             src="https://res.cloudinary.com/dnyp5jknp/image/upload/v1771571553/Brown_Mascot_Lion_Free_Logo_sfqwsj.png"
-            alt="DPBoss Logo"
+            alt="Dpbossking Logo"
             className="mx-auto h-12 w-auto sm:h-16 object-contain"
           />
         </div>
@@ -52,28 +52,28 @@ export default function HeroSection() {
           </button>
         </div>
 
-        {/* Scrolling: Welcome DPboss King */}
+        {/* Scrolling: Welcome Dpbossking */}
         <div className="hero-scroll-wrap">
           <div className="hero-scroll-text text-gold-400 font-semibold text-sm sm:text-base inline-flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5">
               <span className="text-gold-300" aria-hidden="true">👑</span>
-              Welcome DPboss King
+              Welcome Dpbossking
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="text-gold-300" aria-hidden="true">👑</span>
-              Welcome DPboss King
+              Welcome Dpbossking
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="text-gold-300" aria-hidden="true">👑</span>
-              Welcome DPboss King
+              Welcome Dpbossking
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="text-gold-300" aria-hidden="true">👑</span>
-              Welcome DPboss King
+              Welcome Dpbossking
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="text-gold-300" aria-hidden="true">👑</span>
-              Welcome DPboss King
+              Welcome Dpbossking
             </span>
           </div>
         </div>

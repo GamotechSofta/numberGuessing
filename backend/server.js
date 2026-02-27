@@ -120,7 +120,7 @@ async function initializeDefaultLiveResults() {
 async function initializeDefaultSettings() {
   try {
     const defaultSettings = [
-      { key: 'SITE_NAME', value: 'Dpboss Online', description: 'Website name' },
+      { key: 'SITE_NAME', value: 'Dpbossking', description: 'Website name' },
       { key: 'API_ENDPOINT', value: 'http://localhost:5000', description: 'Backend API endpoint' }
     ];
     

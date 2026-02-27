@@ -10,7 +10,7 @@ export default function FeaturesSection() {
     <section className="w-full py-6 px-4 border-t border-gold-600 bg-black">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-gold-400 text-lg font-semibold mb-4 text-center">
-          Why Choose DpBoss King?
+          Why Choose Dpbossking?
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {FEATURES.map((feature) => (

@@ -4,13 +4,13 @@ export default function About() {
       <div className="w-full py-6 px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gold-400 mb-6 text-center">
-            About DpBoss King
+            About Dpbossking
           </h1>
           
           <div className="bg-black rounded-lg p-4 sm:p-6 border border-gold-600 mb-4 sm:mb-6">
             <h2 className="text-lg sm:text-xl font-semibold text-gold-400 mb-3">Who We Are</h2>
             <p className="text-neutral-300 leading-relaxed mb-3 text-sm sm:text-base">
-              Dpbossonline.com is India's leading Satta Matka results website. We provide 
+              dpbossking.com is India's leading Satta Matka results website. We provide 
               fast and accurate results, expert tips, and comprehensive Matka information 
               to make your experience joyous and rewarding.
             </p>

@@ -6,7 +6,7 @@ export default function DpbossIntroSection() {
         <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3">
           <span className="text-gold-400 text-lg sm:text-xl" aria-hidden="true">♠</span>
           <h2 className="text-gold-400 font-semibold text-sm sm:text-base md:text-lg text-center">
-            DpBoss King | Satta Matka | Kalyan Matka | Online Matka Result
+            Dpbossking | Satta Matka | Kalyan Matka | Online Matka Result
           </h2>
           <span className="text-gold-400 text-lg sm:text-xl" aria-hidden="true">♠</span>
         </div>
@@ -14,7 +14,7 @@ export default function DpbossIntroSection() {
         {/* Body content */}
         <div className="max-w-4xl mx-auto text-gold-400/90 text-sm sm:text-base text-center mb-3 leading-snug space-y-3">
           <p>
-            Welcome to <b>Dpbossonline.com</b> — your trusted destination for fast and accurate Matka market updates.
+            Welcome to <b>dpbossking.com</b> — your trusted destination for fast and accurate Matka market updates.
           </p>
           <p>
             Get timely results, expert insights, and daily guessing numbers across popular markets.

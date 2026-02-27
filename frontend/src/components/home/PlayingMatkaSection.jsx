@@ -6,10 +6,10 @@ export default function PlayingMatkaSection() {
       <div className="max-w-6xl mx-auto">
         <div className="bg-black rounded-lg p-4 border border-gold-600">
           <h2 className="text-gold-400 text-base font-semibold mb-3 text-center">
-            PLAYING SATTA MATKA WITH DPBOSS KING
+            PLAYING SATTA MATKA WITH DPBOSSKING
           </h2>
           <p className="text-neutral-300 leading-relaxed text-center text-sm mb-3">
-            DpBoss King is a top-notch online Matka industry leader providing 
+            Dpbossking is a top-notch online Matka industry leader providing 
             fast and accurate results. We offer expert tips, live results, and a 
             comprehensive Matka experience.
           </p>

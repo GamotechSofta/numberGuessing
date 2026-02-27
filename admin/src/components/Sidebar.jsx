@@ -66,7 +66,7 @@ export default function Sidebar({ activeSection, setActiveSection, sidebarOpen, 
                   }`}
                 >
                   <span className="text-lg sm:text-xl">{item.icon}</span>
-                  <span>{item.label}</span>
+                  <span className="whitespace-nowrap">{item.label}</span>
                 </button>
               </li>
             ))}
