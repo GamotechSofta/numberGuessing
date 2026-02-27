@@ -994,13 +994,14 @@ app.get('/api/daily-results/:id', async (req, res) => {
   }
 });
 
-// POST create new daily result
+// POST create new daily result (close is optional for partial results)
 app.post('/api/daily-results', async (req, res) => {
   try {
     const { date, marketName, open, close, result } = req.body;
     
-    if (!date || !marketName || !open || !close) {
-      return res.status(400).json({ error: 'Date, marketName, open, and close are required' });
+    // Only date, marketName, and open are required (close is optional for open-only results)
+    if (!date || !marketName || !open) {
+      return res.status(400).json({ error: 'Date, marketName, and open are required' });
     }
 
     // Parse date and set to start of day
@@ -1011,7 +1012,7 @@ app.post('/api/daily-results', async (req, res) => {
       date: resultDate,
       marketName: marketName.toUpperCase(),
       open: open.trim(),
-      close: close.trim(),
+      close: close ? close.trim() : '',
       result: result ? result.trim() : ''
     });
 

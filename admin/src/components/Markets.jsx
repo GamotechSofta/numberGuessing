@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { getMarketResultDisplay } from '../utils/marketResult'
+import MarketChartModal from './MarketChartModal'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
 const API_URL = `${API_BASE_URL}/api/markets`
+const DAILY_RESULTS_URL = `${API_BASE_URL}/api/daily-results`
 
 const MARKET_TYPES = [
   { id: 'regular', label: 'Regular Market', icon: '📊' },
@@ -34,6 +36,11 @@ export default function Markets() {
   const [openPatti, setOpenPatti] = useState('')
   const [closePatti, setClosePatti] = useState('')
   const [declaredOpenValue, setDeclaredOpenValue] = useState('') // after Declare Open, to send with Declare Close
+  
+  // Chart modal state - uses reusable MarketChartModal component
+  const [chartMarket, setChartMarket] = useState(null)
+  // Refresh trigger - increment to force chart data refetch after result changes
+  const [chartRefreshTrigger, setChartRefreshTrigger] = useState(0)
 
   useEffect(() => {
     fetchMarkets()
@@ -193,6 +200,7 @@ export default function Markets() {
       return
     }
     try {
+      // Update market with open result
       await fetch(`${API_URL}/${addResultMarket._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -202,9 +210,29 @@ export default function Markets() {
           close: addResultMarket.close && addResultMarket.close !== '***' ? addResultMarket.close : '***'
         })
       })
+      
+      // Also save to daily-results for chart history (with open only, close pending)
+      const today = new Date().toISOString().split('T')[0]
+      const openDigits = String(value).replace(/\D/g, '')
+      const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
+      
+      await fetch(DAILY_RESULTS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: today,
+          marketName: addResultMarket.name,
+          open: value,
+          close: '',
+          result: `${openAnk}*`
+        })
+      })
+      
       closeAddResultModal()
       setOpenPatti('')
       fetchMarkets()
+      // Trigger chart refresh after result change
+      setChartRefreshTrigger(prev => prev + 1)
     } catch (err) {
       console.error(err)
       alert('Error declaring open result.')
@@ -219,17 +247,64 @@ export default function Markets() {
       return
     }
     try {
+      const openValue = declaredOpenValue || addResultMarket.open
+      
+      // Update market with close result
       await fetch(`${API_URL}/${addResultMarket._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: addResultMarket.name,
-          open: declaredOpenValue || addResultMarket.open,
+          open: openValue,
           close: value
         })
       })
+      
+      // Update daily-results for chart history
+      const today = new Date().toISOString().split('T')[0]
+      const openDigits = String(openValue).replace(/\D/g, '')
+      const closeDigits = String(value).replace(/\D/g, '')
+      const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
+      const closeAnk = closeDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
+      const jodi = `${openAnk}${closeAnk}`
+      
+      // First, find existing entry for today's date and market
+      const existingRes = await fetch(`${DAILY_RESULTS_URL}?marketName=${encodeURIComponent(addResultMarket.name)}&date=${today}`)
+      const existingData = await existingRes.json()
+      const todayEntry = Array.isArray(existingData) ? existingData.find(r => r.date && r.date.startsWith(today)) : null
+      
+      if (todayEntry && todayEntry._id) {
+        // Update existing entry with close result
+        await fetch(`${DAILY_RESULTS_URL}/${todayEntry._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: today,
+            marketName: addResultMarket.name,
+            open: openValue,
+            close: value,
+            result: jodi
+          })
+        })
+      } else {
+        // Create new entry if none exists
+        await fetch(DAILY_RESULTS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: today,
+            marketName: addResultMarket.name,
+            open: openValue,
+            close: value,
+            result: jodi
+          })
+        })
+      }
+      
       closeAddResultModal()
       fetchMarkets()
+      // Trigger chart refresh after result change
+      setChartRefreshTrigger(prev => prev + 1)
     } catch (err) {
       console.error(err)
       alert('Error declaring close result.')
@@ -251,11 +326,17 @@ export default function Markets() {
       })
       closeAddResultModal()
       fetchMarkets()
+      // Trigger chart refresh after result cleared
+      setChartRefreshTrigger(prev => prev + 1)
     } catch (err) {
       console.error(err)
       alert('Error clearing result.')
     }
   }
+
+  // Chart modal handlers - open/close MarketChartModal
+  const openChartModal = (market) => setChartMarket(market)
+  const closeChartModal = () => setChartMarket(null)
 
   if (loading) {
     return (
@@ -743,12 +824,29 @@ export default function Markets() {
                   >
                     Add Result
                   </button>
+                  {/* Chart button - shows past results history */}
+                  <button
+                    type="button"
+                    onClick={() => openChartModal(market)}
+                    className="flex-1 min-w-0 px-2 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded text-xs"
+                  >
+                    Chart
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Chart Modal - uses reusable MarketChartModal component (same UI as ChartManagement) */}
+      {chartMarket && (
+        <MarketChartModal 
+          market={chartMarket} 
+          onClose={closeChartModal} 
+          refreshTrigger={chartRefreshTrigger}
+        />
+      )}
     </div>
   )
 }

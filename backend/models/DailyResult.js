@@ -19,8 +19,9 @@ const dailyResultSchema = new mongoose.Schema({
   },
   close: {
     type: String,
-    required: true,
-    trim: true
+    required: false,
+    trim: true,
+    default: ''
   },
   result: {
     type: String,
