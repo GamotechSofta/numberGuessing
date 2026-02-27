@@ -3,7 +3,7 @@ export default function LuckyNumberSection({ goldenAnk = '', motorPatti = '' }) 
   const mp = (motorPatti && String(motorPatti).trim()) || '—'
 
   return (
-    <section className="w-full py-6 px-3 sm:px-4 md:px-6 bg-black">
+    <section className="w-full pt-6 pb-2 px-3 sm:px-4 md:px-6 bg-black">
       <div className="w-full overflow-hidden bg-black border-2 border-gold-500 rounded-none">
         {/* Header: same bg as Download App button */}
         <div className="bg-gradient-to-b from-gold-600 via-gold-400 to-gold-600 border-b border-gold-500 py-3 px-0">

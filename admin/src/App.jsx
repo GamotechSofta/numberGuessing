@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import Markets from './components/Markets'
 import LuckyNumber from './components/LuckyNumber'
+import TopMarketsGuessing from './components/TopMarketsGuessing'
 import DailyResults from './components/DailyResults'
 import ChartManagement from './components/ChartManagement'
 import Settings from './components/Settings'
@@ -20,6 +21,8 @@ function App() {
         return <Markets />
       case 'lucky-number':
         return <LuckyNumber />
+      case 'top-markets-guessing':
+        return <TopMarketsGuessing />
       case 'daily-results':
         return <DailyResults />
       case 'chart-management':

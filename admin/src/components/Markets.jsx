@@ -18,7 +18,7 @@ export default function Markets() {
     name: '',
     open: '',
     close: '',
-    marketType: 'main',
+    marketType: 'regular',
     startHour: '10',
     startMin: '30',
     startAmPm: 'AM',
@@ -47,7 +47,7 @@ export default function Markets() {
     name: '',
     open: '',
     close: '',
-    marketType: 'main',
+    marketType: 'regular',
     startHour: '10',
     startMin: '30',
     startAmPm: 'AM',
@@ -79,6 +79,7 @@ export default function Markets() {
         name: formData.name.trim().toUpperCase(),
         open: formData.open || (isFromModal ? '***' : openingTime),
         close: formData.close || (isFromModal ? '***' : closingTime),
+        marketType: formData.marketType || 'regular',
         openingTime,
         closingTime
       }
@@ -136,7 +137,7 @@ export default function Markets() {
       name: market.name,
       open: market.open,
       close: market.close,
-      marketType: 'main',
+      marketType: market.marketType || 'regular',
       startHour: start.hour,
       startMin: start.min,
       startAmPm: start.amPm,
@@ -286,12 +287,14 @@ export default function Markets() {
         ))}
       </div>
 
-      {/* Main / Daily Markets + Add Market */}
+      {/* Markets heading + Add Market button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h3 className="text-lg sm:text-xl font-bold text-white">Main / Daily Markets</h3>
+        <h3 className="text-lg sm:text-xl font-bold text-white">
+          {MARKET_TYPES.find(t => t.id === activeTab)?.label || 'Markets'}
+        </h3>
         <button
           type="button"
-          onClick={() => { setEditingId(null); setFormData(defaultFormData()); setShowModal(true); setShowForm(false) }}
+          onClick={() => { setEditingId(null); setFormData({ ...defaultFormData(), marketType: activeTab }); setShowModal(true); setShowForm(false) }}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-black font-semibold rounded-lg text-sm shrink-0"
         >
           + Add Market
@@ -317,16 +320,16 @@ export default function Markets() {
               {/* Market Type */}
               <div>
                 <p className="text-gray-300 text-sm font-medium mb-2">Market Type</p>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name="marketType"
-                      checked={formData.marketType === 'main'}
-                      onChange={() => setFormData({ ...formData, marketType: 'main' })}
+                      checked={formData.marketType === 'regular'}
+                      onChange={() => setFormData({ ...formData, marketType: 'regular' })}
                       className="text-amber-500"
                     />
-                    <span className="text-white text-sm">Main / Daily Market</span>
+                    <span className="text-white text-sm">Regular</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -336,7 +339,17 @@ export default function Markets() {
                       onChange={() => setFormData({ ...formData, marketType: 'starline' })}
                       className="text-amber-500"
                     />
-                    <span className="text-white text-sm">Startline</span>
+                    <span className="text-white text-sm">Starline</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="marketType"
+                      checked={formData.marketType === 'king'}
+                      onChange={() => setFormData({ ...formData, marketType: 'king' })}
+                      className="text-amber-500"
+                    />
+                    <span className="text-white text-sm">King Bazaar</span>
                   </label>
                 </div>
               </div>
@@ -676,11 +689,12 @@ export default function Markets() {
 
       {/* Market cards grid */}
       <div>
-        {markets.length === 0 ? (
-          <p className="text-gray-400 text-center py-12">No markets found. Add your first market above.</p>
+        {/* Filter markets by selected tab (marketType) */}
+        {markets.filter(m => (m.marketType || 'regular') === activeTab).length === 0 ? (
+          <p className="text-gray-400 text-center py-12">No markets found in this category. Add your first market above.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {markets.map((market) => (
+            {markets.filter(m => (m.marketType || 'regular') === activeTab).map((market) => (
               <div
                 key={market._id}
                 className="bg-slate-700/80 rounded-xl p-4 sm:p-5 border border-slate-600 relative"

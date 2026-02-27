@@ -48,7 +48,9 @@ export default function Home() {
       const response = await fetch(API_URL)
       const data = await response.json()
       if (Array.isArray(data) && data.length > 0) {
-        setMarkets(data.slice(0, 5))
+        // Filter markets marked for Top Markets Guessing section (isTopMarket = true)
+        const topMarkets = data.filter(m => m.isTopMarket === true)
+        setMarkets(topMarkets)
         setAllMarkets(data)
       }
     } catch (_err) {

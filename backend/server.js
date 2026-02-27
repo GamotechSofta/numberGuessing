@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const path = require('path');
+const cron = require('node-cron');
 const Market = require('./models/Market');
 const LiveResult = require('./models/LiveResult');
 const Setting = require('./models/Setting');
@@ -44,6 +45,8 @@ mongoose.connect(mongoUri)
     initializeDefaultLiveResults();
     initializeDefaultSettings();
     initializeDefaultChartData();
+    // Start midnight reset cron job
+    startMidnightResetCron();
   })
   .catch((error) => {
     console.error('✗ MongoDB connection error:', error.message);
@@ -55,6 +58,26 @@ mongoose.connect(mongoUri)
     console.error('5. Check your network connection (if using Atlas)');
     process.exit(1);
   });
+
+// Cron job: Reset all markets at 12 AM (midnight) every day
+function startMidnightResetCron() {
+  // '0 0 * * *' = At 00:00 (midnight) every day
+  cron.schedule('0 0 * * *', async () => {
+    console.log('[CRON] Running midnight market reset...');
+    try {
+      const result = await Market.updateMany(
+        {},
+        { $set: { open: '***', close: '***' } }
+      );
+      console.log(`[CRON] Reset ${result.modifiedCount} markets at midnight`);
+    } catch (error) {
+      console.error('[CRON] Error resetting markets:', error.message);
+    }
+  }, {
+    timezone: 'Asia/Kolkata'
+  });
+  console.log('✓ Midnight market reset cron scheduled (12:00 AM IST)');
+}
 
 // Initialize default markets
 async function initializeDefaultMarkets() {
@@ -149,10 +172,16 @@ app.get('/api/markets', async (req, res) => {
         name: m.name,
         open: m.open,
         close: m.close,
+        marketType: m.marketType || 'regular',
+        isTopMarket: m.isTopMarket || false,
         openingTime: opening,
         closingTime: closing,
         goldenAnk: m.goldenAnk != null ? String(m.goldenAnk).trim() : '',
         motorPatti: m.motorPatti != null ? String(m.motorPatti).trim() : '',
+        // Guessing values for Top Markets section
+        guessingSingle: m.guessingSingle || '',
+        guessingJodi: m.guessingJodi || '',
+        guessingPana: m.guessingPana || '',
         createdAt: m.createdAt,
         updatedAt: m.updatedAt
       };
@@ -181,7 +210,7 @@ app.get('/api/markets/:id', async (req, res) => {
 // POST create new market
 app.post('/api/markets', async (req, res) => {
   try {
-    const { name, open, close, openingTime, closingTime, goldenAnk, motorPatti } = req.body;
+    const { name, open, close, openingTime, closingTime, goldenAnk, motorPatti, marketType } = req.body;
     
     if (!name || !open || !close) {
       return res.status(400).json({ error: 'Name, open, and close are required' });
@@ -191,6 +220,7 @@ app.post('/api/markets', async (req, res) => {
       name: name.toUpperCase(),
       open,
       close,
+      marketType: marketType || 'regular',
       openingTime: openingTime != null ? String(openingTime).trim() : '',
       closingTime: closingTime != null ? String(closingTime).trim() : '',
       goldenAnk: goldenAnk != null ? String(goldenAnk).trim() : '',
@@ -215,16 +245,23 @@ app.post('/api/markets', async (req, res) => {
 // PUT update market
 app.put('/api/markets/:id', async (req, res) => {
   try {
-    const { name, open, close, openingTime, closingTime, goldenAnk, motorPatti } = req.body;
+    const { name, open, close, openingTime, closingTime, goldenAnk, motorPatti, marketType, isTopMarket, guessingSingle, guessingJodi, guessingPana } = req.body;
     const updateData = {};
     
     if (name) updateData.name = name.toUpperCase();
     if (open !== undefined) updateData.open = open;
     if (close !== undefined) updateData.close = close;
+    if (marketType !== undefined) updateData.marketType = marketType;
     if (openingTime !== undefined) updateData.openingTime = String(openingTime).trim();
     if (closingTime !== undefined) updateData.closingTime = String(closingTime).trim();
     if (goldenAnk !== undefined) updateData.goldenAnk = String(goldenAnk).trim();
     if (motorPatti !== undefined) updateData.motorPatti = String(motorPatti).trim();
+    // Handle isTopMarket flag for Top Markets Guessing
+    if (isTopMarket !== undefined) updateData.isTopMarket = Boolean(isTopMarket);
+    // Handle guessing values
+    if (guessingSingle !== undefined) updateData.guessingSingle = String(guessingSingle).trim();
+    if (guessingJodi !== undefined) updateData.guessingJodi = String(guessingJodi).trim();
+    if (guessingPana !== undefined) updateData.guessingPana = String(guessingPana).trim();
 
     const market = await Market.findByIdAndUpdate(
       req.params.id,
@@ -256,6 +293,24 @@ app.delete('/api/markets/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting market:', error);
     res.status(500).json({ error: 'Failed to delete market' });
+  }
+});
+
+// POST reset all markets (manual trigger)
+app.post('/api/markets/reset-all', async (req, res) => {
+  try {
+    const result = await Market.updateMany(
+      {},
+      { $set: { open: '***', close: '***' } }
+    );
+    console.log(`[MANUAL] Reset ${result.modifiedCount} markets`);
+    res.json({ 
+      message: 'All markets reset successfully', 
+      modifiedCount: result.modifiedCount 
+    });
+  } catch (error) {
+    console.error('Error resetting markets:', error);
+    res.status(500).json({ error: 'Failed to reset markets' });
   }
 });
 
