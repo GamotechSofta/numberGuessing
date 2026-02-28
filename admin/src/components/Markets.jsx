@@ -6,6 +6,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 const API_URL = `${API_BASE_URL}/api/markets`
 const DAILY_RESULTS_URL = `${API_BASE_URL}/api/daily-results`
 
+// Helper to get today's date in IST (YYYY-MM-DD format)
+// Fixes timezone issue: ensures correct date after midnight IST
+function getTodayIST() {
+  const now = new Date()
+  // IST offset is UTC+5:30
+  const istOffset = 5.5 * 60 * 60 * 1000
+  const istDate = new Date(now.getTime() + istOffset)
+  return istDate.toISOString().split('T')[0]
+}
+
 const MARKET_TYPES = [
   { id: 'regular', label: 'Regular Market', icon: '📊' },
   { id: 'starline', label: 'Starline Market', icon: '⭐' },
@@ -41,6 +51,11 @@ export default function Markets() {
   const [chartMarket, setChartMarket] = useState(null)
   // Refresh trigger - increment to force chart data refetch after result changes
   const [chartRefreshTrigger, setChartRefreshTrigger] = useState(0)
+  
+  // Edit Result modal state
+  const [editResultMarket, setEditResultMarket] = useState(null)
+  const [editOpenPatti, setEditOpenPatti] = useState('')
+  const [editClosePatti, setEditClosePatti] = useState('')
 
   useEffect(() => {
     fetchMarkets()
@@ -212,7 +227,7 @@ export default function Markets() {
       })
       
       // Also save to daily-results for chart history (with open only, close pending)
-      const today = new Date().toISOString().split('T')[0]
+      const today = getTodayIST()
       const openDigits = String(value).replace(/\D/g, '')
       const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
       
@@ -261,7 +276,7 @@ export default function Markets() {
       })
       
       // Update daily-results for chart history
-      const today = new Date().toISOString().split('T')[0]
+      const today = getTodayIST()
       const openDigits = String(openValue).replace(/\D/g, '')
       const closeDigits = String(value).replace(/\D/g, '')
       const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
@@ -337,6 +352,111 @@ export default function Markets() {
   // Chart modal handlers - open/close MarketChartModal
   const openChartModal = (market) => setChartMarket(market)
   const closeChartModal = () => setChartMarket(null)
+
+  // Edit Result modal handlers
+  const openEditResultModal = (market) => {
+    setEditResultMarket(market)
+    const currentOpen = market.open && market.open !== '***' ? String(market.open).replace(/\D/g, '') : ''
+    const currentClose = market.close && market.close !== '***' ? String(market.close).replace(/\D/g, '') : ''
+    setEditOpenPatti(currentOpen)
+    setEditClosePatti(currentClose)
+  }
+
+  const closeEditResultModal = () => {
+    setEditResultMarket(null)
+    setEditOpenPatti('')
+    setEditClosePatti('')
+  }
+
+  const handleSaveEditResult = async () => {
+    if (!editResultMarket) return
+    
+    const openValue = editOpenPatti.replace(/\D/g, '').slice(0, 3)
+    const closeValue = editClosePatti.replace(/\D/g, '').slice(0, 3)
+    
+    if (!openValue) {
+      alert('Please enter at least Open Patti (3 digits).')
+      return
+    }
+    
+    try {
+      await fetch(`${API_URL}/${editResultMarket._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editResultMarket.name,
+          open: openValue || '***',
+          close: closeValue || '***'
+        })
+})
+
+      const today = getTodayIST()
+      const openDigits = openValue || ''
+      const closeDigits = closeValue || ''
+      
+      let resultJodi = ''
+      if (openDigits.length === 3) {
+        const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
+        if (closeDigits.length === 3) {
+          const closeAnk = closeDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
+          resultJodi = `${openAnk}${closeAnk}`
+        } else {
+          resultJodi = `${openAnk}*`
+        }
+      }
+      
+      const allEntriesRes = await fetch(`${DAILY_RESULTS_URL}?marketName=${encodeURIComponent(editResultMarket.name)}`)
+      const allEntries = await allEntriesRes.json()
+      const sortedEntries = Array.isArray(allEntries) ? allEntries.sort((a, b) => new Date(b.date) - new Date(a.date)) : []
+      const mostRecentEntry = sortedEntries.length > 0 ? sortedEntries[0] : null
+      const todayEntry = sortedEntries.find(r => r.date && r.date.startsWith(today))
+      
+      if (todayEntry && todayEntry._id) {
+        await fetch(`${DAILY_RESULTS_URL}/${todayEntry._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: today,
+            marketName: editResultMarket.name,
+            open: openValue || '',
+            close: closeValue || '',
+            result: resultJodi
+          })
+        })
+      } else if (mostRecentEntry && mostRecentEntry._id) {
+        await fetch(`${DAILY_RESULTS_URL}/${mostRecentEntry._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: mostRecentEntry.date,
+            marketName: editResultMarket.name,
+            open: openValue || '',
+            close: closeValue || '',
+            result: resultJodi
+          })
+        })
+      } else if (openValue) {
+        await fetch(DAILY_RESULTS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: today,
+            marketName: editResultMarket.name,
+            open: openValue,
+            close: closeValue || '',
+            result: resultJodi
+          })
+        })
+      }
+      
+      closeEditResultModal()
+      fetchMarkets()
+      setChartRefreshTrigger(prev => prev + 1)
+    } catch (err) {
+      console.error(err)
+      alert('Error saving edited result.')
+    }
+  }
 
   if (loading) {
     return (
@@ -805,24 +925,10 @@ export default function Markets() {
                 <div className="flex gap-1.5 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => handleEdit(market)}
-                    className="flex-1 min-w-0 px-2 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded text-xs"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => handleDelete(market._id)}
                     className="flex-1 min-w-0 px-2 py-1.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded text-xs"
                   >
                     Delete
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openAddResultModal(market)}
-                    className="flex-1 min-w-0 px-2 py-1.5 bg-green-600 hover:bg-green-500 text-white font-semibold rounded text-xs"
-                  >
-                    Add Result
                   </button>
                   {/* Chart button - shows past results history */}
                   <button
@@ -830,7 +936,7 @@ export default function Markets() {
                     onClick={() => openChartModal(market)}
                     className="flex-1 min-w-0 px-2 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded text-xs"
                   >
-                    Chart
+                    View Chart
                   </button>
                 </div>
               </div>
@@ -839,13 +945,76 @@ export default function Markets() {
         )}
       </div>
 
-      {/* Chart Modal - uses reusable MarketChartModal component (same UI as ChartManagement) */}
+{/* Chart Modal - uses reusable MarketChartModal component (same UI as ChartManagement) */}
       {chartMarket && (
-        <MarketChartModal 
-          market={chartMarket} 
-          onClose={closeChartModal} 
+        <MarketChartModal
+          market={chartMarket}
+          onClose={closeChartModal}
           refreshTrigger={chartRefreshTrigger}
         />
+      )}
+
+      {/* Edit Result Modal */}
+      {editResultMarket && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={closeEditResultModal}>
+          <div className="bg-gray-800 rounded-xl w-full max-w-md shadow-xl border border-gray-600" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-600">
+              <h3 className="text-lg font-bold text-white capitalize">
+                Edit Result - {editResultMarket.name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+              </h3>
+              <button
+                type="button"
+                onClick={closeEditResultModal}
+                className="text-gray-400 hover:text-white p-1 rounded"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-gray-300 text-sm font-medium mb-2">Open Patti (3 digits)</label>
+                <input
+                  type="text"
+                  value={editOpenPatti}
+                  onChange={(e) => setEditOpenPatti(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:outline-none"
+                  placeholder="e.g. 123"
+                  maxLength={3}
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 text-sm font-medium mb-2">Close Patti (3 digits)</label>
+                <input
+                  type="text"
+                  value={editClosePatti}
+                  onChange={(e) => setEditClosePatti(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-amber-500 focus:outline-none"
+                  placeholder="e.g. 456"
+                  maxLength={3}
+                />
+              </div>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveEditResult}
+                  className="w-full px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={closeEditResultModal}
+                  className="w-full px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

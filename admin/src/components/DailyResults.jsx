@@ -6,6 +6,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 const DAILY_RESULTS_URL = `${API_BASE_URL}/api/daily-results`
 const MARKETS_URL = `${API_BASE_URL}/api/markets`
 
+// Helper to get today's date in IST (YYYY-MM-DD format)
+// Fixes timezone issue: ensures correct date after midnight IST
+function getTodayIST() {
+  const now = new Date()
+  // IST offset is UTC+5:30
+  const istOffset = 5.5 * 60 * 60 * 1000
+  const istDate = new Date(now.getTime() + istOffset)
+  return istDate.toISOString().split('T')[0]
+}
+
 export default function DailyResults() {
   const [dailyResults, setDailyResults] = useState([])
   const [markets, setMarkets] = useState([])
@@ -40,9 +50,8 @@ export default function DailyResults() {
   useEffect(() => {
     fetchDailyResults()
     fetchMarkets()
-    // Set default date to today
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0]
+    // Set default date to today (IST)
+    const todayStr = getTodayIST()
     setSelectedDate(todayStr)
     setFormData(prev => ({ ...prev, date: todayStr }))
   }, [])
@@ -174,7 +183,7 @@ export default function DailyResults() {
       })
       
       // Also save to daily-results for chart history (with open only, close pending)
-      const today = new Date().toISOString().split('T')[0]
+      const today = getTodayIST()
       const openDigits = String(value).replace(/\D/g, '')
       const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
       
@@ -223,7 +232,7 @@ export default function DailyResults() {
       })
       
       // Update daily-results for chart history
-      const today = new Date().toISOString().split('T')[0]
+      const today = getTodayIST()
       const openDigits = String(openValue).replace(/\D/g, '')
       const closeDigits = String(value).replace(/\D/g, '')
       const openAnk = openDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
@@ -342,7 +351,7 @@ export default function DailyResults() {
       })
       
       // Update daily-results for chart history
-      const today = new Date().toISOString().split('T')[0]
+      const today = getTodayIST()
       const openDigits = openValue || ''
       const closeDigits = closeValue || ''
       
@@ -589,7 +598,7 @@ export default function DailyResults() {
                     onClick={() => openChartModal(market)}
                     className="flex-1 min-w-0 px-2 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded text-xs"
                   >
-                    Chart
+                    View Chart
                   </button>
                 </div>
               </div>

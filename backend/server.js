@@ -15,6 +15,28 @@ const HtmlChartData = require('./models/HtmlChartData');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ========== DAILY RESET HELPER ==========
+// Helper to compute start of current day (00:00:00 IST)
+// Used for date-based filtering to show fresh state each day without deleting historical data
+function getTodayStart() {
+  const now = new Date();
+  // Create date in IST (UTC+5:30)
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istNow = new Date(now.getTime() + istOffset);
+  const istToday = new Date(istNow.getFullYear(), istNow.getMonth(), istNow.getDate());
+  // Convert back to UTC for comparison
+  return new Date(istToday.getTime() - istOffset);
+}
+
+// Check if a date is today (IST)
+function isToday(date) {
+  if (!date) return false;
+  const todayStart = getTodayStart();
+  const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+  const checkDate = new Date(date);
+  return checkDate >= todayStart && checkDate < todayEnd;
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -59,24 +81,47 @@ mongoose.connect(mongoUri)
     process.exit(1);
   });
 
-// Cron job: Reset all markets at 12 AM (midnight) every day
+// Cron job: Reset all markets, lucky number, and guessing values at 12 AM (midnight) every day
+// This ensures fresh state each day while preserving historical data via date-based filtering
 function startMidnightResetCron() {
   // '0 0 * * *' = At 00:00 (midnight) every day
   cron.schedule('0 0 * * *', async () => {
-    console.log('[CRON] Running midnight market reset...');
+    console.log('[CRON] Running midnight reset for Markets, Lucky Number, Top Markets Guessing...');
     try {
-      const result = await Market.updateMany(
+      // Reset market open/close values, guessing values, and Top Market selections
+      // All daily data resets at midnight for fresh state each day
+      const marketResult = await Market.updateMany(
         {},
-        { $set: { open: '***', close: '***' } }
+        { $set: { 
+          open: '***', 
+          close: '***',
+          // Reset guessing values for Top Markets section (daily reset)
+          guessingSingle: '',
+          guessingJodi: '',
+          guessingPana: '',
+          // Reset Top Market selections - admin must reselect daily
+          isTopMarket: false
+        } }
       );
-      console.log(`[CRON] Reset ${result.modifiedCount} markets at midnight`);
+      console.log(`[CRON] Reset ${marketResult.modifiedCount} markets at midnight`);
+      
+      // Reset Lucky Number values (sets to empty/dash for fresh state)
+      await Setting.findOneAndUpdate(
+        { key: 'LUCKY_GOLDEN_ANK' },
+        { $set: { value: '-' } }
+      );
+      await Setting.findOneAndUpdate(
+        { key: 'LUCKY_MOTOR_PATTI' },
+        { $set: { value: '-' } }
+      );
+      console.log('[CRON] Reset Lucky Number values at midnight');
     } catch (error) {
-      console.error('[CRON] Error resetting markets:', error.message);
+      console.error('[CRON] Error during midnight reset:', error.message);
     }
   }, {
     timezone: 'Asia/Kolkata'
   });
-  console.log('✓ Midnight market reset cron scheduled (12:00 AM IST)');
+  console.log('✓ Midnight reset cron scheduled (12:00 AM IST) - Markets, Lucky Number, Top Markets Guessing');
 }
 
 // Initialize default markets
@@ -161,27 +206,38 @@ async function initializeDefaultChartData() {
 }
 
 // GET all markets
+// Daily reset behavior: Market open/close and guessing values show fresh state after midnight
+// Historical data preserved in DB but filtered out via date-based logic
 app.get('/api/markets', async (req, res) => {
   try {
     const markets = await Market.find().sort({ createdAt: -1 }).lean();
     const withTimes = markets.map((m) => {
       const opening = m.openingTime != null ? String(m.openingTime).trim() : '';
       const closing = m.closingTime != null ? String(m.closingTime).trim() : '';
+      
+      // Date-based filtering for daily reset:
+      // If market was not updated today, show default values (fresh state)
+      const updatedToday = isToday(m.updatedAt);
+      
       return {
         _id: m._id,
         name: m.name,
-        open: m.open,
-        close: m.close,
+        // Open/close show fresh state (***) if not updated today
+        open: updatedToday ? m.open : '***',
+        close: updatedToday ? m.close : '***',
         marketType: m.marketType || 'regular',
-        isTopMarket: m.isTopMarket || false,
+        // isTopMarket - daily reset: only show as selected if marked TODAY
+        // After midnight, selections reset (admin must reselect daily)
+        // Historical data preserved in DB but filtered out via date check
+        isTopMarket: updatedToday ? (m.isTopMarket === true) : false,
         openingTime: opening,
         closingTime: closing,
         goldenAnk: m.goldenAnk != null ? String(m.goldenAnk).trim() : '',
         motorPatti: m.motorPatti != null ? String(m.motorPatti).trim() : '',
-        // Guessing values for Top Markets section
-        guessingSingle: m.guessingSingle || '',
-        guessingJodi: m.guessingJodi || '',
-        guessingPana: m.guessingPana || '',
+        // Guessing values for Top Markets section - filtered by today (fresh state each day)
+        guessingSingle: updatedToday ? (m.guessingSingle || '') : '',
+        guessingJodi: updatedToday ? (m.guessingJodi || '') : '',
+        guessingPana: updatedToday ? (m.guessingPana || '') : '',
         createdAt: m.createdAt,
         updatedAt: m.updatedAt
       };
@@ -409,6 +465,7 @@ app.delete('/api/live-results/:id', async (req, res) => {
 });
 
 // ========== LUCKY NUMBER API (single site-wide) ==========
+// Daily reset: Only shows values updated today; previous-day values filtered out (not deleted)
 const LUCKY_GOLDEN_ANK_KEY = 'LUCKY_GOLDEN_ANK'
 const LUCKY_MOTOR_PATTI_KEY = 'LUCKY_MOTOR_PATTI'
 
@@ -418,13 +475,22 @@ app.get('/api/lucky-number', async (req, res) => {
       Setting.findOne({ key: LUCKY_GOLDEN_ANK_KEY }).lean(),
       Setting.findOne({ key: LUCKY_MOTOR_PATTI_KEY }).lean()
     ]);
-    const toVal = (s) => {
-      const v = (s && String(s).trim()) || '';
+    
+    // Date-based filtering: Return empty if not updated today (fresh state after midnight)
+    // Historical values remain in DB but are not displayed for new day
+    const toVal = (setting) => {
+      if (!setting) return '';
+      // Check if setting was updated today
+      if (!isToday(setting.updatedAt)) {
+        return ''; // Fresh state for new day
+      }
+      const v = (setting.value && String(setting.value).trim()) || '';
       return v === '-' ? '' : v;
     };
+    
     res.json({
-      goldenAnk: toVal(goldenAnkSetting?.value),
-      motorPatti: toVal(motorPattiSetting?.value)
+      goldenAnk: toVal(goldenAnkSetting),
+      motorPatti: toVal(motorPattiSetting)
     });
   } catch (error) {
     console.error('Error fetching lucky number:', error);
@@ -952,6 +1018,9 @@ app.post('/api/daily-results/seed', async (req, res) => {
 });
 
 // ========== DAILY RESULTS API ==========
+// Daily Results already supports date-based filtering via query params
+// Historical data is preserved and can be queried by specific date
+// Frontend components filter by today's date to show only current day's results
 
 // GET all daily results
 app.get('/api/daily-results', async (req, res) => {
@@ -960,7 +1029,7 @@ app.get('/api/daily-results', async (req, res) => {
     const query = {};
     
     if (date) {
-      // Parse date and set to start of day
+      // Parse date and set to start of day for date-scoped filtering
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
