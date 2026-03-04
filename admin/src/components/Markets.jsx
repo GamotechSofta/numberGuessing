@@ -16,6 +16,27 @@ function getTodayIST() {
   return istDate.toISOString().split('T')[0]
 }
 
+/** Parse "10:30 AM" / "11:45 PM" to minutes since midnight. */
+function parseTimeToMinutes(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return null
+  const m = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!m) return null
+  let hour = parseInt(m[1], 10)
+  const min = parseInt(m[2], 10)
+  if (m[3].toUpperCase() === 'PM') hour = hour === 12 ? 12 : hour + 12
+  else hour = hour === 12 ? 0 : hour
+  return hour * 60 + min
+}
+
+/** True if current time is before closing time (IST). Compare Closing only. */
+function isMarketOpen(closingTime) {
+  const closeMin = parseTimeToMinutes(closingTime)
+  if (closeMin == null) return false
+  const ist = new Date(Date.now() + 5.5 * 60 * 60 * 1000)
+  const now = ist.getUTCHours() * 60 + ist.getUTCMinutes()
+  return now < closeMin
+}
+
 const MARKET_TYPES = [
   { id: 'regular', label: 'Regular Market', icon: '📊' },
   { id: 'starline', label: 'Starline Market', icon: '⭐' },
@@ -51,7 +72,12 @@ export default function Markets() {
   const [chartMarket, setChartMarket] = useState(null)
   // Refresh trigger - increment to force chart data refetch after result changes
   const [chartRefreshTrigger, setChartRefreshTrigger] = useState(0)
-  
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60000)
+    return () => clearInterval(id)
+  }, [])
+
   // Edit Result modal state
   const [editResultMarket, setEditResultMarket] = useState(null)
   const [editOpenPatti, setEditOpenPatti] = useState('')
@@ -910,9 +936,15 @@ export default function Markets() {
                 </p>
 
                 {/* Status pill */}
-                <span className="inline-block px-3 py-1 rounded-full bg-red-600 text-white text-xs font-semibold uppercase mb-3">
-                  Closed
-                </span>
+                {(() => {
+                  const ct = (market.closingTime ?? market.closing_time ?? '').trim()
+                  const open = ct && isMarketOpen(ct)
+                  return (
+                    <span className={`inline-block px-3 py-1 rounded-full text-white text-xs font-semibold uppercase mb-3 ${open ? 'bg-green-600' : 'bg-red-600'}`}>
+                      {open ? 'Open' : 'Closed'}
+                    </span>
+                  )
+                })()}
 
                 {/* Market name */}
                 <h4 className="text-lg sm:text-xl font-bold text-white mb-2 capitalize pr-24">
