@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getMarketResultDisplay } from '../../utils/marketResult'
+import MarketChartModalPublic from './MarketChartModalPublic'
 
 /** Parse "10:30 AM" / "11:45 PM" to minutes since midnight for sorting. */
 function parseTimeToMinutes(timeStr) {
@@ -28,6 +30,8 @@ function sortMarketsByTime(markets) {
 
 export default function AllMarketsSection({ markets, loading }) {
   const sortedMarkets = sortMarketsByTime(markets)
+  const [chartMarket, setChartMarket] = useState(null)
+
   return (
     <section className="w-full py-6 px-3 sm:px-4 md:px-6 bg-black border-t border-b border-amber-700/80">
       <div className="w-full mx-auto border-2 border-gold-500 overflow-hidden bg-black rounded-none">
@@ -50,12 +54,13 @@ export default function AllMarketsSection({ markets, loading }) {
                 key={market._id || market.id}
                 className="flex items-center justify-between gap-4 py-5 px-4 w-full"
               >
-                <Link
-                  to="/charts"
+                <button
+                  type="button"
+                  onClick={() => setChartMarket(market)}
                   className="flex-shrink-0 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold uppercase px-4 py-2.5 rounded transition-colors"
                 >
                   Panel
-                </Link>
+                </button>
 
                 <div className="flex-1 min-w-0 text-center px-2">
                   {/* 1. MARKET NAME - italic yellow, uppercase */}
@@ -107,6 +112,13 @@ export default function AllMarketsSection({ markets, loading }) {
           </div>
         )}
       </div>
+
+      {chartMarket && (
+        <MarketChartModalPublic
+          market={chartMarket}
+          onClose={() => setChartMarket(null)}
+        />
+      )}
     </section>
   )
 }
