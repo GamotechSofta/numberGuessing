@@ -25,7 +25,10 @@ export default function MarketChartModal({ market, onClose, refreshTrigger = 0 }
   const fetchChartData = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${DAILY_RESULTS_URL}?marketName=${encodeURIComponent(market.name)}`)
+      // Add cache-busting timestamp to ensure fresh data
+      const response = await fetch(`${DAILY_RESULTS_URL}?marketName=${encodeURIComponent(market.name)}&_t=${Date.now()}`, {
+        cache: 'no-store'
+      })
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }

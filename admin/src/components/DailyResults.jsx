@@ -239,10 +239,14 @@ export default function DailyResults() {
       const closeAnk = closeDigits.split('').reduce((sum, d) => sum + parseInt(d, 10), 0) % 10
       const jodi = `${openAnk}${closeAnk}`
       
-      // First, find existing entry for today's date and market
-      const existingRes = await fetch(`${DAILY_RESULTS_URL}?marketName=${encodeURIComponent(addResultMarket.name)}&date=${today}`)
+      // Find ALL entries for this market and look for today's entry
+      const existingRes = await fetch(`${DAILY_RESULTS_URL}?marketName=${encodeURIComponent(addResultMarket.name)}`)
       const existingData = await existingRes.json()
-      const todayEntry = Array.isArray(existingData) ? existingData.find(r => r.date && r.date.startsWith(today)) : null
+      const todayEntry = Array.isArray(existingData) ? existingData.find(r => {
+        if (!r.date) return false
+        const entryDate = typeof r.date === 'string' ? r.date : new Date(r.date).toISOString()
+        return entryDate.startsWith(today)
+      }) : null
       
       if (todayEntry && todayEntry._id) {
         // Update existing entry with close result
