@@ -1038,7 +1038,11 @@ app.get('/api/daily-results', async (req, res) => {
     }
     
     if (marketName) {
-      query.marketName = marketName.toUpperCase();
+      // Case-insensitive exact match so old records like "SRIDEVI"
+      // and new ones like "SHRIDEVI" / "Shridevi" are all included.
+      query.marketName = {
+        $regex: new RegExp(`^${marketName}$`, 'i')
+      };
     }
     
     const results = await DailyResult.find(query).sort({ date: -1, marketName: 1 });

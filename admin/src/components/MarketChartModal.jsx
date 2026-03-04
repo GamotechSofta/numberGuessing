@@ -38,19 +38,23 @@ export default function MarketChartModal({ market, onClose, refreshTrigger = 0 }
       const weekMap = {}
       
       dbResults.forEach(result => {
-        const resultDate = new Date(result.date)
+        // Use date-only (YYYY-MM-DD) to avoid timezone shifting data to wrong day
+        const raw = result.date
+        const dateStr = typeof raw === 'string' ? raw.split('T')[0] : new Date(raw).toISOString().split('T')[0]
+        const [y, m, d] = dateStr.split('-').map(Number)
+        const resultDate = new Date(y, m - 1, d)
         const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][resultDate.getDay()]
-        
+
         // Find the week this date belongs to (Monday to Sunday)
         const monday = new Date(resultDate)
         const day = resultDate.getDay()
         const diff = resultDate.getDate() - day + (day === 0 ? -6 : 1)
         monday.setDate(diff)
         monday.setHours(0, 0, 0, 0)
-        
+
         const sunday = new Date(monday)
         sunday.setDate(sunday.getDate() + 6)
-        
+
         const formatDate = (date) => {
           const dd = String(date.getDate()).padStart(2, '0')
           const mm = String(date.getMonth() + 1).padStart(2, '0')

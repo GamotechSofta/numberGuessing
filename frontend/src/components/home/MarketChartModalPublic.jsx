@@ -32,7 +32,11 @@ export default function MarketChartModalPublic({ market, onClose }) {
       const weekMap = {}
 
       dbResults.forEach((result) => {
-        const resultDate = new Date(result.date)
+        // Use date-only (YYYY-MM-DD) to avoid timezone shifting data to wrong day
+        const raw = result.date
+        const dateStr = typeof raw === 'string' ? raw.split('T')[0] : new Date(raw).toISOString().split('T')[0]
+        const [y, m, d] = dateStr.split('-').map(Number)
+        const resultDate = new Date(y, m - 1, d)
         const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][resultDate.getDay()]
 
         const monday = new Date(resultDate)
